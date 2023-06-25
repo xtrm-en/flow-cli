@@ -166,7 +166,7 @@ class OutputStreamHook:
                         frame_opt = frame.f_back
                         if frame_opt is not None:
                             code = frame_opt.f_code
-                            logger_name = f"{Path(code.co_filename).stem}.py/{code.co_name}"
+                            logger_name = f"{code.co_filename.split('/')[-1]}/{code.co_name}"
             # End of hell.
 
         # Append the text to the output

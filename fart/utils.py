@@ -5,6 +5,8 @@ import inquirer
 import sys
 from types import ModuleType
 
+from fart.config import get_config
+
 
 def prompt(questions):
     """Wraps the inquirer#prompt function to allow for custom output hooking."""
@@ -15,10 +17,56 @@ def prompt(questions):
     return answers
 
 
-def info(message: object, end: str = "\n") -> None:
+GLOBAL_SYMBOL_TABLE = {
+    "emoji": {
+        "info": "ℹ️",
+        "warn": "⚠️",
+        "error": "❌",
+        "success": "✅",
+    },
+    "unicode": {
+        "info": "ℹ",
+        "warn": "⚠",
+        "error": "𐄂",
+        "success": "✓",
+    },
+    "ascii": {
+        "info": "i",
+        "warn": "!",
+        "error": "x",
+        "success": "v",
+    },
+}
+
+SYMBOL_TABLE = GLOBAL_SYMBOL_TABLE["ascii"]
+
+
+def log(message: object, end: str = "\n") -> None:
     """Prints a message to the original standard output stream, as well as the hooked one."""
     print(message, end=end)
     sys.__stdout__.write(str(message) + end)
+
+
+def __symbol(message: object, symbol: str, color: str) -> None:
+    config = get_config()
+    brackets: bool = config["logging"]["log_brackets"]
+    log(f"{Colors.DARK_GRAY}{'[' if brackets else ''}{color}{SYMBOL_TABLE[symbol]}{Colors.DARK_GRAY}{']' if brackets else ''}{Colors.WHITE} {message}{Colors.RESET}")
+
+
+def info(message: object) -> None:
+    __symbol(message, "info", Colors.CYAN)
+
+
+def warn(message: object) -> None:
+    __symbol(message, "warn", Colors.YELLOW)
+
+
+def error(message: object) -> None:
+    __symbol(message, "error", Colors.RED)
+
+
+def success(message: object) -> None:
+    __symbol(message, "success", Colors.GREEN)
 
 
 class Colors:
@@ -92,3 +140,10 @@ class Colors:
                 ctypes.windll.kernel32.GetStdHandle(-11), 7
             )
             del ctypes
+
+
+def set_unicode_symbols(value: str):
+    global SYMBOL_TABLE
+    global GLOBAL_SYMBOL_TABLE
+
+    SYMBOL_TABLE = GLOBAL_SYMBOL_TABLE[value]

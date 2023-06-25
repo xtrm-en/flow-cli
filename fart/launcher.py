@@ -21,9 +21,11 @@ def hijack_python_path() -> None:
     sys.path.insert(0, root)
 
 
-def hijack_streams() -> None:
+def hijack_streams(logging: bool = False) -> None:
     """Allows modified printing by replacing the
     standard output streams with custom ones."""
+    if logging:
+        os.environ["FART_DEBUG_LOG"] = "1"
 
     # Debug log output
     writeback: bool = False
@@ -45,9 +47,6 @@ def restore_streams() -> None:
 
 
 def main() -> None:
-    startup_time: float
-    delta: float
-
     # Hijack the Python syspath
     hijack_python_path()
 
@@ -56,7 +55,7 @@ def main() -> None:
     print("Initialized output stream hooks")
 
     # Get the startup time
-    startup_time = time.time()
+    startup_time: float = time.time()
 
     # Load the main module and call the main function
     print("Fetching main target...", end=" ")
@@ -75,6 +74,11 @@ def main() -> None:
             sys.__stderr__.write(
                 "Unhandled exception traceback:\n" + traceback.format_exc()
             )
+
+        # ensure hijacked
+        restore_streams()
+        hijack_streams()
+
         print(f"Execution took {time.time() - startup_time:.2f} s")
     except ModuleNotFoundError as e:
         print("failed")
@@ -85,12 +89,11 @@ def main() -> None:
     restore_streams()
 
     # Prevents creating another logfile with the same name
-    delta = time.time() - startup_time
+    delta: float = time.time() - startup_time
     if delta < 1:
 
-        def signal_handler(sig: int, frame: Optional[FrameType]) -> None:
-            cols: int
-            cols = os.get_terminal_size().columns
+        def signal_handler(_: int, __: Optional[FrameType]) -> None:
+            cols: int = os.get_terminal_size().columns
 
             # Don't print weird control characters in the terminal
             sys.__stdout__.write("\r" + " " * cols + "\r")

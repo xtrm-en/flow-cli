@@ -1,5 +1,5 @@
-# Fast Automated and Reliable Tool
+# Fast and Autonomous Reliability Tool
 ###### F.A.R.T.
 
-## Oui?
-stiti
+## License
+This project is licensed under the LGPLv3, see the [LICENSE.md](./LICENSE) file for more details.

@@ -1,4 +1,16 @@
-# FEATURES
+# Features
+
+## `fart aliases`
+Setup aliases .bashrc/.zshrc/.fishrc
+
+## `fart check`
+Norminette + GCC (max? flags)
+
+## `fart config`
+- Flags
+- Norminette
+- Makefile
+- Libft
 
 ## `fart compile [<name>]`
 ```
@@ -20,11 +32,12 @@ end
 ->rm ./a.out
 ```
 
-## `fart tester or fart tester generate c01 ex1`
+## `fart tester` or `fart tester generate c01 ex1`
 ```
 check if c file is <CNameList>
 strlen -> slkjebkjHEBfjhkwbef = 19
 strlen_tester.c
 ```
 
-fart setup
+## `fart watch`
+Repliquer comportement `watch -n0`
