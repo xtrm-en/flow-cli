@@ -201,5 +201,9 @@ tags
 # End of https://www.toptal.com/developers/gitignore/api/python,linux,vim
 # Start of custom gitignore
 
+# IDEs
+.idea/
+.vscode/
+
 # Project logfiles
 /logs
