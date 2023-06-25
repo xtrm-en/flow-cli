@@ -1,18 +1,6 @@
-import sys
-
-from fart.utils import xlog
-import inquirer
+import argparse
+from fart.utils import info
 
 
 def main() -> None:
-    xlog("Welcome to F.A.R.T.")
-    sys.stdout.flush()
-
-    questions = [
-        inquirer.Checkbox('interests',
-                          message="What are you interested in?",
-                          choices=['Computers', 'Books', 'Science', 'Nature', 'Fantasy', 'History'],
-                          ),
-    ]
-    answers = inquirer.prompt(questions)
-    print(answers['interests'])
+    info("Welcome to F.A.R.T.")

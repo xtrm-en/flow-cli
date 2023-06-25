@@ -34,8 +34,6 @@ def hijack_streams() -> None:
     OutputStreamHook.apply(sys, "stdout", False, writeback, write_logs)
     OutputStreamHook.apply(sys, "stderr", True, writeback, write_logs)
 
-    print("Initialized output stream hooks")
-
 
 def restore_streams() -> None:
     """Restores the standard output stream."""
@@ -55,6 +53,7 @@ def main() -> None:
 
     # Hijack the output streams
     hijack_streams()
+    print("Initialized output stream hooks")
 
     # Get the startup time
     startup_time = time.time()
@@ -66,19 +65,21 @@ def main() -> None:
         print("got:", main_module)
 
         print("Calling main function...")
+        # noinspection PyBroadException
         try:
             main_module.__dict__["main"].__dict__["main"]()
         except Exception:
             import traceback
 
-            print("An unhandled exception occurred in the main function")
-            sys.stderr.write(
+            print("An unhandled exception occurred in the main function:\n" + traceback.format_exc())
+            sys.__stderr__.write(
                 "Unhandled exception traceback:\n" + traceback.format_exc()
             )
         print(f"Execution took {time.time() - startup_time:.2f} s")
-    except ModuleNotFoundError:
+    except ModuleNotFoundError as e:
         print("failed")
         print("Could not find main module, aborting execution!")
+        print(e)
 
     # Unhook the output streams
     restore_streams()

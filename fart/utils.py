@@ -1,14 +1,24 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import annotations
+import inquirer
 import sys
 from types import ModuleType
 
 
-def xlog(message: str, end: str = "\n") -> None:
+def prompt(questions):
+    """Wraps the inquirer#prompt function to allow for custom output hooking."""
+    from fart.launcher import hijack_streams, restore_streams
+    restore_streams()
+    answers = inquirer.prompt(questions)
+    hijack_streams()
+    return answers
+
+
+def info(message: object, end: str = "\n") -> None:
     """Prints a message to the original standard output stream, as well as the hooked one."""
     print(message, end=end)
-    sys.__stdout__.write(message + end)
+    sys.__stdout__.write(str(message) + end)
 
 
 class Colors:
