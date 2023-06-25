@@ -1,0 +1,11 @@
+[project]
+name = "fart"
+version = "1.0.0"
+description = "tbd"
+authors = [
+    {name = "ROUSSARIE Killian", email="oss@xtrm.me"},
+    {name = "LASBORDES Yaniss"}
+]
+license = {file = "LICENSE"}
+readme = "README.md"
+requires-python = ">=3.8"
