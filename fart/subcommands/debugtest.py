@@ -1,11 +1,11 @@
-from argparse import Namespace
+from argparse import Namespace, ArgumentParser
 
 from fart.commands import create
 from fart.config import get_config
 from fart.utils import info, warn, success, error, log
 
 
-def test(_: Namespace) -> None:
+def test(_: ArgumentParser, __: Namespace) -> None:
     config = get_config()
     info("Information log uwu nya")
     warn("Warning log uwu nya")

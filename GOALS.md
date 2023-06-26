@@ -40,4 +40,7 @@ strlen_tester.c
 ```
 
 ## `fart watch`
-Repliquer comportement `watch -n0`
+Repliquer comportement `watch -n0 fart check` (en gros)
+
+## `fart valgrind`
+memcheck + leaks + flags

@@ -57,6 +57,8 @@ def main() -> None:
     # Get the startup time
     startup_time: float = time.time()
 
+    exit_code: int
+
     # Load the main module and call the main function
     print("Fetching main target...", end=" ")
     try:
@@ -66,7 +68,7 @@ def main() -> None:
         print("Calling main function...")
         # noinspection PyBroadException
         try:
-            main_module.__dict__["main"].__dict__["main"]()
+            exit_code = main_module.__dict__["main"].__dict__["main"]()
         except Exception:
             import traceback
 
@@ -74,6 +76,7 @@ def main() -> None:
             sys.__stderr__.write(
                 "Unhandled exception traceback:\n" + traceback.format_exc()
             )
+            exit_code = -1
 
         # ensure hijacked
         restore_streams()
@@ -81,6 +84,7 @@ def main() -> None:
 
         print(f"Execution took {time.time() - startup_time:.2f} s")
     except ModuleNotFoundError as e:
+        exit_code = -2
         print("failed")
         print("Could not find main module, aborting execution!")
         print(e)
@@ -88,22 +92,8 @@ def main() -> None:
     # Unhook the output streams
     restore_streams()
 
-    # Prevents creating another logfile with the same name
-    delta: float = time.time() - startup_time
-    if delta < 1:
-
-        def signal_handler(_: int, __: Optional[FrameType]) -> None:
-            cols: int = os.get_terminal_size().columns
-
-            # Don't print weird control characters in the terminal
-            sys.__stdout__.write("\r" + " " * cols + "\r")
-            sys.__stdout__.flush()
-
-        signal.signal(signal.SIGINT, signal_handler)
-        time.sleep(1.01 - delta)
-
     # Exit the program
-    sys.exit(0)
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":

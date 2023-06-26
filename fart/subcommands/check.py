@@ -1,5 +1,5 @@
-from argparse import Namespace
-from typing import Callable
+from argparse import Namespace, ArgumentParser
+from typing import Callable, Optional
 
 from fart.commands import create
 from fart.config import get_config
@@ -7,7 +7,7 @@ from fart.utils import info, warn, success, error, log
 import subprocess
 
 
-def gcc(_: Namespace) -> bool:
+def gcc(_: Optional[Namespace] = None) -> bool:
     config = get_config()
 
     process = subprocess.run([config["commands"]["compiler_command"], *config["commands"]["compiler_flags"]], capture_output=True)
@@ -39,7 +39,7 @@ checks: list[Callable[[Namespace], bool]] = [
 ]
 
 
-def check(namespace: Namespace) -> None:
+def __exec(_: ArgumentParser, namespace: Namespace) -> None:
     config = get_config()
     disabled_checks = config["check"]["checks"]
 
@@ -67,4 +67,4 @@ def check(namespace: Namespace) -> None:
         success("All checks passed.")
 
 
-create("check", "checks your code for formatting or compilation errors", lambda parser: None, check)
+create("check", "checks your code for formatting or compilation errors", lambda parser: None, __exec)

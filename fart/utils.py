@@ -17,7 +17,7 @@ def prompt(questions):
     return answers
 
 
-GLOBAL_SYMBOL_TABLE = {
+SYMBOL_TABLE = {
     "emoji": {
         "info": "ℹ️",
         "warn": "⚠️",
@@ -38,8 +38,6 @@ GLOBAL_SYMBOL_TABLE = {
     },
 }
 
-SYMBOL_TABLE = GLOBAL_SYMBOL_TABLE["ascii"]
-
 
 def log(message: object, end: str = "\n") -> None:
     """Prints a message to the original standard output stream, as well as the hooked one."""
@@ -47,26 +45,42 @@ def log(message: object, end: str = "\n") -> None:
     sys.__stdout__.write(str(message) + end)
 
 
-def __symbol(message: object, symbol: str, color: str) -> None:
+def __symbol(message: object, symbol: str, color: str, end: str = "\n") -> None:
     config = get_config()
     brackets: bool = config["logging"]["log_brackets"]
-    log(f"{Colors.DARK_GRAY}{'[' if brackets else ''}{color}{SYMBOL_TABLE[symbol]}{Colors.DARK_GRAY}{']' if brackets else ''}{Colors.WHITE} {message}{Colors.RESET}")
+    symbol_type: str = config["logging"]["log_symbols"]
+    log(f"{Colors.DARK_GRAY}{'[' if brackets else ''}{color}{SYMBOL_TABLE[symbol_type][symbol]}{Colors.DARK_GRAY}{']' if brackets else ''}{Colors.WHITE} {message}{Colors.RESET}", end=end)
 
 
-def info(message: object) -> None:
-    __symbol(message, "info", Colors.CYAN)
+def info(message: object, end: str = "\n") -> None:
+    __symbol(message, "info", Colors.CYAN, end=end)
 
 
-def warn(message: object) -> None:
-    __symbol(message, "warn", Colors.YELLOW)
+def warn(message: object, end: str = "\n") -> None:
+    __symbol(message, "warn", Colors.YELLOW, end=end)
 
 
-def error(message: object) -> None:
-    __symbol(message, "error", Colors.RED)
+def error(message: object, end: str = "\n") -> None:
+    __symbol(message, "error", Colors.RED, end=end)
 
 
-def success(message: object) -> None:
-    __symbol(message, "success", Colors.GREEN)
+def success(message: object, end: str = "\n") -> None:
+    __symbol(message, "success", Colors.GREEN, end=end)
+
+
+def parse(value: str, t: type) -> object:
+    if t == str:
+        return value
+    elif t == int:
+        return int(value)
+    elif t == float:
+        return float(value)
+    elif t == bool:
+        return value.lower() == "true"
+    elif t == list:
+        return value.split(",")
+    else:
+        raise ValueError(f"Invalid type {t}")
 
 
 class Colors:

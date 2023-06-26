@@ -3,15 +3,9 @@ from xdg_base_dirs import xdg_config_home
 
 CONFIG_FILE = xdg_config_home() / "fart" / "config.toml"
 
-COMPILER_FLAGS_PRESETS: dict[str, list[str]] = {
-    "none": [],
-    "default": ["-Wall", "-Wextra", "-Werror"],
-    "hardened": ["-Wall", "-Wextra", "-Werror", "-Wpedantic"],
-    "hardcore": ["-Wall", "-Wextra", "-Werror", "-Wpedantic", "-Wno-unused-parameter", "-Wno-unused-variable",
-                 "-Wno-unused-function", "-Wno-unused-but-set-variable", "-Wno-unused-but-set-parameter",
-                 "-Wno-unused-value", "-Wno-unused-label", "-Wno-unused-result", "-Wno-unused-local-typedefs",
-                 "-Wno-unused-macros"]
-}
+COMPILER_FLAGS_PRESETS: dict[str, list[str]] = {"none": ["-O0", "-g"]}
+COMPILER_FLAGS_PRESETS["default"] = [*COMPILER_FLAGS_PRESETS["none"], "-Wall", "-Wextra", "-Werror"]
+COMPILER_FLAGS_PRESETS["hardened"] = [*COMPILER_FLAGS_PRESETS["default"], "-Wpedantic"]
 
 DEFAULT_CONFIG = {
     "logging": {
@@ -19,7 +13,7 @@ DEFAULT_CONFIG = {
         "log_brackets": True,
     },
     "commands": {
-        "compiler_command": "gcc",
+        "compiler_command": "clang",
         "compiler_flags": COMPILER_FLAGS_PRESETS["default"],
         "norminette_command": "norminette",
         "norminette_flags": [],
@@ -62,11 +56,11 @@ def load_config() -> dict:
 
 def save_config() -> None:
     print(f"Saving configuration to {CONFIG_FILE}")
-    global __config
 
     CONFIG_FILE.write_text(toml.dumps(__config))
 
 
-def get_config() -> dict:
-    global __config
+def get_config(default: bool = False) -> dict:
+    if default:
+        return DEFAULT_CONFIG
     return __config
