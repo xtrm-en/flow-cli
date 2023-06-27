@@ -34,6 +34,13 @@ end
 
 ## `fart tester` or `fart tester generate c01 ex1`
 ```
+reimpl_main.c
+
+if (ft_strlen(CONDITION), strlen(EGAL))
+    return 1;
+```
+
+```    
 check if c file is <CNameList>
 strlen -> slkjebkjHEBfjhkwbef = 19
 strlen_tester.c

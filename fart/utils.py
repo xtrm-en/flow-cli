@@ -68,6 +68,12 @@ def success(message: object, end: str = "\n") -> None:
     __symbol(message, "success", Colors.GREEN, end=end)
 
 
+def stringify(v: object) -> str:
+    if isinstance(v, list):
+        return ",".join(v)
+    return str(v)
+
+
 def parse(value: str, t: type) -> object:
     if t == str:
         return value

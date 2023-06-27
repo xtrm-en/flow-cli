@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from argparse import Namespace, ArgumentParser
 
 from fart.commands import create

@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 from argparse import Namespace, ArgumentParser
+from dataclasses import dataclass
 from typing import Callable, Optional
 
 from fart.commands import create
-from fart.config import get_config
+from fart.config import get_config, POSSIBLE_VALUES
 from fart.utils import info, warn, success, error, log
 import subprocess
 
@@ -18,18 +20,52 @@ def gcc(_: Optional[Namespace] = None) -> bool:
     return True
 
 
+@dataclass
+class NormErrorData:
+    type: str
+    line: int
+    column: int
+    message: str
+
+
 def norminette(_: Namespace) -> bool:
+    # TODO: change to Popen and buffer the output in real time
     process = subprocess.run(["norminette"], capture_output=True)
     if process.returncode != 0:
+        errors: dict[str, list[NormErrorData]] = {}
         output = process.stdout.decode("utf-8")
+        last_data = None
         for line in output.split("\n"):
             if line.endswith("OK!"):
                 # success(line[:-5])
                 pass
             elif line.endswith("Error!"):
-                error(line[:-8])
+                # error(line[:-8])
+                last_data = line.split(":")[0]
+                errors[last_data] = []
             elif line.startswith("Error: "):
-                log("\t" + line[7:], end="\n")
+                # log("\t" + line[7:], end="\n")
+                if last_data is None:
+                    warn("Found error without file name.")
+                    continue
+                if last_data not in errors:
+                    errors[last_data] = []
+
+                tokens = [token.strip() for token in line[7:].replace("\t", " ").split(" ") if len(token.strip()) > 0]
+                message: str = " ".join(tokens[5:])
+                errors[last_data].append(
+                    NormErrorData(
+                        tokens[0],
+                        int(tokens[2].split(",")[0]),
+                        int(tokens[4].split(")")[0]),
+                        message,
+                    )
+                )
+
+        for file, file_errors in errors.items():
+            error(f"File {file} has {len(file_errors)} errors:")
+            for file_error in file_errors:
+                log(f"\t{file_error.type} on line {file_error.line}, column {file_error.column}: {file_error.message}")
         return False
     return True
 
@@ -37,19 +73,29 @@ def norminette(_: Namespace) -> bool:
 checks: list[Callable[[Namespace], bool]] = [
     norminette, gcc
 ]
+POSSIBLE_VALUES["check.disabled_checks"] = [c.__name__ for c in checks],
+
+
+def __praser(parser: ArgumentParser) -> None:
+    parser.add_argument("checks", help="checks to run", nargs="*")
 
 
 def __exec(_: ArgumentParser, namespace: Namespace) -> None:
     config = get_config()
-    disabled_checks = config["check"]["checks"]
+    enabled_checks = config["check"]["disabled_checks"]
+    force_enabled_checks = namespace.checks
 
-    if len(disabled_checks) > 0:
-        warn(f"Skipping {len(disabled_checks)} disabled check" + ("s" if len(disabled_checks) != 1 else "") + ".")
+    for check in force_enabled_checks:
+        if check not in enabled_checks:
+            enabled_checks.append(check)
+
+    if len(enabled_checks) != len(checks):
+        warn(f"Skipping {len(checks) - len(enabled_checks)} disabled check" + ("s" if len(checks) - len(enabled_checks) != 1 else "") + ".")
 
     result = True
     for check_func in checks:
         check_name = check_func.__name__
-        if check_name in disabled_checks:
+        if check_name not in enabled_checks:
             print(f"Skipping check '{check_name}' since it's disabled.")
             continue
         info(f"Running check '{check_name}'")
@@ -58,7 +104,7 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> None:
             warn(f"Check '{check_name}' failed.")
             result = False
         else:
-            # success(f"Check '{check_name}' passed.")
+            success(f"Check '{check_name}' passed.")
             pass
 
     if not result:
@@ -67,4 +113,4 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> None:
         success("All checks passed.")
 
 
-create("check", "checks your code for formatting or compilation errors", lambda parser: None, __exec)
+create("check", "checks your code for formatting or compilation errors", __praser, __exec)

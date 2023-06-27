@@ -12,7 +12,7 @@ class CommandData:
     name: str
     description: str
     creation_callback: Optional[Callable[[ArgumentParser], None]]
-    run_callback: Callable[[ArgumentParser, Namespace], None]
+    run_callback: Callable[[ArgumentParser, Namespace], int]
 
 
 __cmd_data: list[CommandData] = []
@@ -43,5 +43,5 @@ def load_commands() -> None:
 
 
 def create(name: str, description: str, creation_callback: Callable[[ArgumentParser], None],
-           run_callback: Callable[[ArgumentParser, Namespace], None]) -> None:
+           run_callback: Callable[[ArgumentParser, Namespace], int]) -> None:
     __cmd_data.append(CommandData(name, description, creation_callback, run_callback))

@@ -1,0 +1,12 @@
+{
+  "type": "c/reimpl",
+  "inputs": "inputs.txt",
+  "target": {
+    "decl": "int ft_strlen(char *str);",
+    "name": "ft_strlen"
+  },
+  "source": "strlen",
+  "includes": [
+    "string.h"
+  ]
+}

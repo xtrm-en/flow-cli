@@ -1,11 +1,27 @@
-import toml
-from xdg_base_dirs import xdg_config_home
+import os
+from pathlib import Path
 
-CONFIG_FILE = xdg_config_home() / "fart" / "config.toml"
+import toml
+
+
+def __config_home() -> Path:
+    if "posix" in os.name or "linux" in os.name:
+        from xdg_base_dirs import xdg_config_home
+        return xdg_config_home()
+    elif "win" in os.name or "nt" in os.name:
+        return Path(os.getenv("APPDATA", os.path.expanduser("~")))
+    raise NotImplementedError("Unsupported OS")
+
+
+CONFIG_FILE = __config_home() / "fart" / "config.toml"
 
 COMPILER_FLAGS_PRESETS: dict[str, list[str]] = {"none": ["-O0", "-g"]}
 COMPILER_FLAGS_PRESETS["default"] = [*COMPILER_FLAGS_PRESETS["none"], "-Wall", "-Wextra", "-Werror"]
 COMPILER_FLAGS_PRESETS["hardened"] = [*COMPILER_FLAGS_PRESETS["default"], "-Wpedantic"]
+
+POSSIBLE_VALUES = {
+    "general.log_symbols": ["ascii", "unicode", "emoji"],
+}
 
 DEFAULT_CONFIG = {
     "logging": {
@@ -19,13 +35,8 @@ DEFAULT_CONFIG = {
         "norminette_flags": [],
     },
     "check": {
-        "checks": ["norminette", "gcc"],
+        "disabled_checks": [],
     },
-}
-
-POSSIBLE_VALUES = {
-    "general.log_symbols": ["ascii", "unicode", "emojis"],
-    "check.checks": ["norminette", "gcc"],
 }
 
 __config: dict = {}

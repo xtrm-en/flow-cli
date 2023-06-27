@@ -1,12 +1,12 @@
 import argparse
 import sys
+import time
 from typing import Callable
 
 from fart.commands import get_command_data, load_commands
 from fart.config import load_config
 from fart.launcher import hijack_streams, restore_streams
-from fart.utils import log, set_unicode_symbols
-import time
+from fart.utils import log, error
 
 
 def main() -> int:
@@ -17,16 +17,19 @@ def main() -> int:
     # required because argparse is cringe
     restore_streams()
 
-    global_args = argparse.ArgumentParser(exit_on_error=True, )
-    global_args.add_argument("-v", "--version", dest="version", help="show the program's version number and exit",
-                             action="store_true")
+    parser = argparse.ArgumentParser(exit_on_error=True, formatter_class=CustomFormatter)
+    parser.add_argument("-v", "--version", dest="version", help="show the program's version number and exit",
+                        action="store_true")
+    # Aliases
 
     # Subcommands
-    commands_parser = global_args.add_subparsers(title="subcommands", help='available subcommands',
-                                                 dest='subcommand')
+    commands_parser = parser.add_subparsers(title="subcommands",
+                                            dest='subcommand', description="description custom")
+    # custom_description: str = ""
+
     subcommand_execs: dict[
         str,
-        tuple[Callable[[argparse.ArgumentParser, argparse.Namespace], None], argparse.ArgumentParser]
+        tuple[Callable[[argparse.ArgumentParser, argparse.Namespace], int], argparse.ArgumentParser]
     ] = {}
     for cmd in get_command_data():
         cmd_parser = commands_parser.add_parser(cmd.name, help=cmd.description)
@@ -34,9 +37,11 @@ def main() -> int:
             cmd.creation_callback(cmd_parser)
         subcommand_execs[cmd.name] = (cmd.run_callback, cmd_parser)
 
-    args = global_args.parse_args()
+    parser.formatter_class = argparse.RawDescriptionHelpFormatter
+    args = parser.parse_args()
 
     hijack_streams()
+    log(args)
     if args.version:
         from importlib.metadata import version
         log("Running fart-cli", end=" ")
@@ -44,13 +49,23 @@ def main() -> int:
         return 0
 
     if args.subcommand is None:
-        global_args.print_help(file=sys.__stdout__)
+        parser.print_help(file=sys.__stdout__)
         return 0
 
     start_time = time.time()
     print(f"Running subcommand '{args.subcommand}'...")
     target, parser = subcommand_execs[args.subcommand]
-    target(parser, args)
-    print(f"Finished subcommand '{args.subcommand}' in {round(time.time() - start_time, 2)} seconds.")
+    code: int
+    try:
+        code = target(parser, args)
+    except BaseException as e:
+        error(f"An error occurred while running subcommand '{args.subcommand}': {e}")
+        code = -3
+    print(
+        f"Finished subcommand '{args.subcommand}' in {round(time.time() - start_time, 2)} seconds, return code: {code}.")
 
-    return 0
+    return code
+
+
+class CustomFormatter(argparse.HelpFormatter):
+    pass

@@ -1,11 +1,11 @@
-import sys
+# -*- coding: utf-8 -*-
 from argparse import ArgumentParser, Namespace
 
 import inquirer
 
 from fart.commands import create
 from fart.config import get_config, save_config, COMPILER_FLAGS_PRESETS
-from fart.utils import info, log, error, warn, prompt, parse
+from fart.utils import info, log, error, warn, prompt, parse, stringify
 
 
 def __parser(parser: ArgumentParser) -> None:
@@ -24,9 +24,9 @@ def list_all(flat: dict, flat_default: dict, changed_only: bool = False) -> None
         if not found_one:
             found_one = True
             log("")
-        log(f"\t{key}: {value}")
+        log(f"\t{key}: {stringify(value)}")
         if changed_only:
-            log(f"\t\t(default: {flat_default[key]})")
+            log(f"\t\t(default: {stringify(flat_default[key])})")
     if not found_one:
         log(" (none)")
 
@@ -74,6 +74,7 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> None:
             return
 
         if namespace.value is not None:
+            # TODO: check config#POSSIBLE_VALUES
             result = str(set_key(namespace.key, str(namespace.value)))
             save_config()
             info(f"Set config key '{namespace.key}' to '{result}'")
@@ -106,7 +107,8 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> None:
                 inquirer.List(
                     "args",
                     message="Pick your preset",
-                    choices=[(k[0].upper() + k[1:].lower() + " (" + str(COMPILER_FLAGS_PRESETS[k]) + ")") for k in COMPILER_FLAGS_PRESETS.keys()],
+                    choices=[(k[0].upper() + k[1:].lower() + " (" + str(COMPILER_FLAGS_PRESETS[k]) + ")") for k in
+                             COMPILER_FLAGS_PRESETS.keys()],
                 ),
             ])["args"]
             arg_key = args.split(" ")[0].lower()
@@ -138,9 +140,10 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> None:
                     inquirer.Text(
                         "value",
                         message="What do you want to change it to",
-                        default=str(target_dict[result])
+                        default=stringify(target_dict[result])
                     ),
                 ])["value"]
+                # TODO: check config#POSSIBLE_VALUES
                 value = set_key(final_key, value)
                 save_config()
                 info(f"Set config key '{final_key}' to '{value}'")
