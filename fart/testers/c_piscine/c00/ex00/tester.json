@@ -1,0 +1,12 @@
+{
+  "type": "c/reimpl",
+  "inputs": "inputs.txt",
+  "target": {
+    "decl": "void ft_putchar(char c);",
+    "name": "ft_putchar"
+  },
+  "source": "putchar",
+  "includes": [
+    "stdio.h"
+  ]
+}

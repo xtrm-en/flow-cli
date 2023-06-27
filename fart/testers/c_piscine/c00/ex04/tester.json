@@ -1,0 +1,8 @@
+{
+  "type": "c/program",
+  "inputs": "inputs.txt",
+  "target": {
+    "decl": "void ft_is_negative(char c);",
+    "name": "ft_is_negative"
+  }
+}

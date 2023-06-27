@@ -1,0 +1,8 @@
+{
+  "type": "c/programOnly1Answer",
+  "answer": "123456789",
+  "target": {
+    "decl": "void ft_print_numbers(void);",
+    "name": "ft_print_numbers"
+  }
+}

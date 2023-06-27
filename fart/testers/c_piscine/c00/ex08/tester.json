@@ -1,0 +1,8 @@
+{
+  "type": "c/program",
+  "inputs": "inputs.txt",
+  "target": {
+    "decl": "ft_print_combn(int n)",
+    "name": "ft_print_combn"
+  }
+}

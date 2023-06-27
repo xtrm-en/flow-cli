@@ -1,0 +1,8 @@
+{
+  "type": "c/program",
+  "inputs": "inputs.txt",
+  "target": {
+    "decl": "void ft_putnbr(int nb)",
+    "name": "ft_putnbr"
+  }
+}

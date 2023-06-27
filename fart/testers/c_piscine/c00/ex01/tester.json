@@ -1,0 +1,8 @@
+{
+  "type": "c/programOnly1Answer",
+  "answer": "abcdefghijklmnopqrstuvwxyz",
+  "target": {
+    "decl": "void ft_print_alphabet(void);",
+    "name": "ft_print_alphabet"
+  },
+}
