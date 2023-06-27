@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import os
-from os.path import dirname, realpath
-import signal
 import sys
 import time
-from types import FrameType, ModuleType
-from typing import Optional
+from os.path import dirname, realpath
+from types import ModuleType
 
 
 def hijack_python_path() -> None:

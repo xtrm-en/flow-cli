@@ -12,7 +12,8 @@ import subprocess
 def gcc(_: Optional[Namespace] = None) -> bool:
     config = get_config()
 
-    process = subprocess.run([config["commands"]["compiler_command"], *config["commands"]["compiler_flags"]], capture_output=True)
+    process = subprocess.run([config["commands"]["compiler_command"], *config["commands"]["compiler_flags"]],
+                             capture_output=True)
     if process.returncode != 0:
         output = process.stderr.decode("utf-8")
         log(output)
@@ -82,20 +83,16 @@ def __praser(parser: ArgumentParser) -> None:
 
 def __exec(_: ArgumentParser, namespace: Namespace) -> None:
     config = get_config()
-    enabled_checks = config["check"]["disabled_checks"]
+    disabled_checks = config["check"]["disabled_checks"]
     force_enabled_checks = namespace.checks
 
-    for check in force_enabled_checks:
-        if check not in enabled_checks:
-            enabled_checks.append(check)
-
-    if len(enabled_checks) != len(checks):
-        warn(f"Skipping {len(checks) - len(enabled_checks)} disabled check" + ("s" if len(checks) - len(enabled_checks) != 1 else "") + ".")
+    if len(force_enabled_checks) > 0:
+        disabled_checks = [check for check in disabled_checks if check not in force_enabled_checks]
 
     result = True
     for check_func in checks:
         check_name = check_func.__name__
-        if check_name not in enabled_checks:
+        if check_name in disabled_checks:
             print(f"Skipping check '{check_name}' since it's disabled.")
             continue
         info(f"Running check '{check_name}'")

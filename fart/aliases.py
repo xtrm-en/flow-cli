@@ -12,8 +12,7 @@ def __parser(parser: ArgumentParser) -> None:
     parser.add_argument("extra", help="extra arguments to pass to the command", nargs="*")
 
 
-def __wrap(command: str, extra: list[str]) -> None:
-    config = get_config()
+def __wrap(command: str, extra: list[str]) -> int:
     command = " ".join([command, *extra])
     print(f"Running {command}")
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -24,11 +23,12 @@ def __wrap(command: str, extra: list[str]) -> None:
         if output:
             log(output.decode("utf-8").strip())
     rc = process.poll()
+    print(f"Process {command} exited with code {rc}")
     return rc
 
 
 def __gcc(_: ArgumentParser, namespace: Namespace) -> int:
-    pass
+    return __wrap("gcc", [*get_config()["commands"]["compiler_flags"], *namespace.extra])
 
 
 def __clang(_: ArgumentParser, namespace: Namespace) -> int:
