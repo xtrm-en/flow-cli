@@ -1,6 +1,7 @@
 import argparse
 import sys
 import time
+import traceback
 from typing import Callable
 
 from fart.commands import get_command_data, load_commands
@@ -56,13 +57,14 @@ def main() -> int:
     print(f"Running subcommand '{args.subcommand}'...")
     target, parser = subcommand_execs[args.subcommand]
     code: int
+    # noinspection PyBroadException
     try:
         code = target(parser, args)
-    except BaseException as e:
-        error(f"An error occurred while running subcommand '{args.subcommand}': {e}")
+    except Exception as e:
+        error(f"An error occurred while running subcommand '{args.subcommand}', aborting.")
+        print(traceback.format_exc())
         code = -3
-    print(
-        f"Finished subcommand '{args.subcommand}' in {round(time.time() - start_time, 2)} seconds, return code: {code}.")
+    print(f"Finished subcommand '{args.subcommand}' in {round(time.time() - start_time, 2)} seconds, return code: {code}.")
 
     return code
 

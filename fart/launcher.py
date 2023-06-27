@@ -69,11 +69,9 @@ def main() -> None:
             exit_code = main_module.__dict__["main"].__dict__["main"]()
         except Exception:
             import traceback
+            from fart.utils import error
 
-            print("An unhandled exception occurred in the main function:\n" + traceback.format_exc())
-            sys.__stderr__.write(
-                "Unhandled exception traceback:\n" + traceback.format_exc()
-            )
+            error("An unhandled exception occurred in the main function:\n" + traceback.format_exc() + "\n")
             exit_code = -1
 
         # ensure hijacked
@@ -86,6 +84,10 @@ def main() -> None:
         print("failed")
         print("Could not find main module, aborting execution!")
         print(e)
+    
+    if os.environ["FART_DEBUG_LOG"] == "1":
+        from fart.utils import log
+        log("Debug log dumped at " + os.environ["FART_LOG_FILE"])
 
     # Unhook the output streams
     restore_streams()
