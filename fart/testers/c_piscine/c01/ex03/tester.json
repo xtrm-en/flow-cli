@@ -1,0 +1,8 @@
+{
+  "type": "c/program",
+  "inputs": "inputs.txt",
+  "target": {
+    "decl": "void ft_div_mod(int a, int b, int *div, int *mod);",
+    "name": "ft_div_mod"
+  }
+}

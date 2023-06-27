@@ -1,0 +1,8 @@
+{
+  "type": "c/program",
+  "inputs": "inputs.txt",
+  "target": {
+    "decl": "void ft_swap(int *a, int *b);",
+    "name": "ft_swap"
+  }
+}

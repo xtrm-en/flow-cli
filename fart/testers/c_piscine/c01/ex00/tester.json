@@ -1,0 +1,8 @@
+{
+  "type": "c/program",
+  "inputs": "inputs.txt",
+  "target": {
+    "decl": "int ft_ft(int *nbr);",
+    "name": "ft_ft"
+  }
+}
