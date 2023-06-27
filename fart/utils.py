@@ -49,7 +49,8 @@ def __symbol(message: object, symbol: str, color: str, end: str = "\n") -> None:
     config = get_config()
     brackets: bool = config["logging"]["log_brackets"]
     symbol_type: str = config["logging"]["log_symbols"]
-    log(f"{Colors.DARK_GRAY}{'[' if brackets else ''}{color}{SYMBOL_TABLE[symbol_type][symbol]}{Colors.DARK_GRAY}{']' if brackets else ''}{Colors.WHITE} {message}{Colors.RESET}", end=end)
+    log(f"{Colors.DARK_GRAY}{'[' if brackets else ''}{color}{SYMBOL_TABLE[symbol_type][symbol]}{Colors.DARK_GRAY}{']' if brackets else ''}{Colors.WHITE} {message}{Colors.RESET}",
+        end=end)
 
 
 def info(message: object, end: str = "\n") -> None:
@@ -84,7 +85,10 @@ def parse(value: str, t: type) -> object:
     elif t == bool:
         return value.lower() == "true"
     elif t == list:
-        return value.split(",")
+        value_list = value.split(",")
+        if len(value_list) == 1 and value_list[0] == "":
+            return []
+        return value_list
     else:
         raise ValueError(f"Invalid type {t}")
 

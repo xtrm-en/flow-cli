@@ -9,7 +9,7 @@ from fart.utils import info, warn, success, error, log
 import subprocess
 
 
-def gcc(_: Optional[Namespace] = None) -> bool:
+def compiler(_: Optional[Namespace] = None) -> bool:
     config = get_config()
 
     process = subprocess.run([config["commands"]["compiler_command"], *config["commands"]["compiler_flags"]],
@@ -72,28 +72,28 @@ def norminette(_: Namespace) -> bool:
 
 
 checks: list[Callable[[Namespace], bool]] = [
-    norminette, gcc
+    norminette, compiler
 ]
-POSSIBLE_VALUES["check.disabled_checks"] = [c.__name__ for c in checks],
+POSSIBLE_VALUES["check.disabled_checks"] = [c.__name__ for c in checks]
 
 
 def __praser(parser: ArgumentParser) -> None:
     parser.add_argument("checks", help="checks to run", nargs="*")
 
 
-def __exec(_: ArgumentParser, namespace: Namespace) -> None:
+def __exec(_: ArgumentParser, namespace: Namespace) -> int:
     config = get_config()
     disabled_checks = config["check"]["disabled_checks"]
-    force_enabled_checks = namespace.checks
+    force_checks = namespace.checks
 
-    if len(force_enabled_checks) > 0:
-        disabled_checks = [check for check in disabled_checks if check not in force_enabled_checks]
+    if len(force_checks) > 0:
+        disabled_checks = [check.__name__ for check in checks if check.__name__ not in force_checks]
 
     result = True
     for check_func in checks:
         check_name = check_func.__name__
         if check_name in disabled_checks:
-            print(f"Skipping check '{check_name}' since it's disabled.")
+            info(f"Skipping check '{check_name}' since it's disabled.")
             continue
         info(f"Running check '{check_name}'")
         check_res: bool = check_func(namespace)
@@ -106,8 +106,10 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> None:
 
     if not result:
         error("Some checks failed. Please fix them before continuing.")
-    else:
-        success("All checks passed.")
+        return 1
+
+    success("All checks passed.")
+    return 0
 
 
 create("check", "checks your code for formatting or compilation errors", __praser, __exec)

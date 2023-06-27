@@ -4,8 +4,19 @@ from argparse import ArgumentParser, Namespace
 import inquirer
 
 from fart.commands import create
-from fart.config import get_config, save_config, COMPILER_FLAGS_PRESETS
+from fart.config import get_config, save_config, COMPILER_FLAGS_PRESETS, POSSIBLE_VALUES
 from fart.utils import info, log, error, warn, prompt, parse, stringify
+
+
+def flatten_dict(d: dict, parent_key: str = "", sep: str = ".") -> dict:
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
 
 
 def __parser(parser: ArgumentParser) -> None:
@@ -31,18 +42,36 @@ def list_all(flat: dict, flat_default: dict, changed_only: bool = False) -> None
         log(" (none)")
 
 
-def __exec(_: ArgumentParser, namespace: Namespace) -> None:
-    unflattened_config = get_config()
+def follows_restrictions(key: str, value: object) -> bool:
+    allowed = POSSIBLE_VALUES.get(key)
+    if allowed is None:
+        return True
 
-    def flatten_dict(d: dict, parent_key: str = "", sep: str = ".") -> dict:
-        items = []
-        for k, v in d.items():
-            new_key = parent_key + sep + k if parent_key else k
-            if isinstance(v, dict):
-                items.extend(flatten_dict(v, new_key, sep=sep).items())
-            else:
-                items.append((new_key, v))
-        return dict(items)
+    default_config = flatten_dict(get_config(default=True))
+    default_value = default_config.get(key)
+    if default_value is None:
+        return True
+
+    if isinstance(default_value, list):
+        if not isinstance(value, list):
+            error(f"Value '{value}' is not a list for key '{key}'.")
+            return False
+        for v in value:
+            if v not in allowed:
+                error(f"Value '{v}' is not allowed for key '{key}'. (allowed: {allowed})")
+                return False
+    elif isinstance(default_value, str):
+        if value not in allowed:
+            error(f"Value '{value}' is not allowed for key '{key}'. (allowed: {allowed})")
+            return False
+    else:
+        error(f"Key '{key}' has an unknown restriction type '{type(default_value)}'.")
+        return False
+    return True
+
+
+def __exec(_: ArgumentParser, namespace: Namespace) -> int:
+    unflattened_config = get_config()
 
     def set_key(flattened_key: str, val: str) -> object:
         keys = flattened_key.split(".")
@@ -62,7 +91,7 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> None:
     changed_only: bool = namespace.changed
     if namespace.list:
         list_all(flat, flat_default, changed_only)
-        return
+        return 0
     elif changed_only:
         warn("The '--changed' flag is only used with '--list'.")
 
@@ -71,16 +100,17 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> None:
         value: object = flat.get(key)
         if value is None:
             error(f"Config key '{key}' does not exist.")
-            return
+            return 2
 
         if namespace.value is not None:
-            # TODO: check config#POSSIBLE_VALUES
+            if not follows_restrictions(key, parse(namespace.value, type(flat_default[key]))):
+                return 3
             result = str(set_key(namespace.key, str(namespace.value)))
             save_config()
             info(f"Set config key '{namespace.key}' to '{result}'")
         else:
             info(f"Config key '{namespace.key}': {flat[namespace.key]}")
-        return
+        return 0
 
     action: str = prompt([
         inquirer.List(
@@ -143,13 +173,17 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> None:
                         default=stringify(target_dict[result])
                     ),
                 ])["value"]
-                # TODO: check config#POSSIBLE_VALUES
+
+                if not follows_restrictions(final_key, parse(value, type(flat_default[result]))):
+                    return 3
+
                 value = set_key(final_key, value)
                 save_config()
                 info(f"Set config key '{final_key}' to '{value}'")
                 break
     elif action != "Exit":
         error("How did you get here?")
+    return 0
 
 
 create("config", "change configuration values", __parser, __exec)
