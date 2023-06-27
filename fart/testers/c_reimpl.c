@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     progress = 1;
 
     {STARTCHECK}
-    fart_check({TEST_TARGET} == {TEST_SOURCE})
+    fart_check({TEST_TARGET} == {TEST_SOURCE});
     progress++;
     {ENDCHECK}
 
