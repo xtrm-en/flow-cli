@@ -45,6 +45,12 @@ def log(message: object, end: str = "\n") -> None:
     sys.__stdout__.write(str(message) + end)
 
 
+def fatal(message: object, end: str = "\n") -> None:
+    """Prints a fatal error message to the original standard error stream, as well as the hooked one."""
+    print(message, end=end, file=sys.stderr)
+    sys.__stderr__.write(str(message) + end)
+
+
 def __symbol(message: object, symbol: str, color: str, end: str = "\n") -> None:
     config = get_config()
     brackets: bool = config["logging"]["log_brackets"]

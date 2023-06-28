@@ -1,8 +1,8 @@
 {
-  "type": "c/programOnly1Answer",
-  "answer": "zyxwvutsrqponmlkjihgfedcba",
+  "type": "c.scan_stdout",
+  "output": "zyxwvutsrqponmlkjihgfedcba",
   "target": {
     "decl": "void ft_print_reverse_alphabet(void);",
     "name": "ft_print_reverse_alphabet"
-  },
+  }
 }

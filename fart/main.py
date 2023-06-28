@@ -7,7 +7,7 @@ from typing import Callable
 from fart.commands import get_command_data, load_commands
 from fart.config import load_config
 from fart.launcher import hijack_streams, restore_streams
-from fart.utils import log, error
+from fart.utils import log, error, fatal
 
 
 def main() -> int:
@@ -22,6 +22,7 @@ def main() -> int:
     parser.add_argument("-v", "--version", dest="version", help="show the program's version number and exit",
                         action="store_true")
     # Aliases
+    # TODO
 
     # Subcommands
     commands_parser = parser.add_subparsers(title="subcommands",
@@ -42,7 +43,7 @@ def main() -> int:
     args = parser.parse_args()
 
     hijack_streams()
-    log(args)
+    # log(args)
     if args.version:
         from importlib.metadata import version
         log("Running fart-cli", end=" ")
@@ -62,12 +63,26 @@ def main() -> int:
         code = target(parser, args)
     except Exception as e:
         error(f"An error occurred while running subcommand '{args.subcommand}', aborting.")
-        print(traceback.format_exc())
+        fatal(traceback.format_exc())
         code = -3
     print(f"Finished subcommand '{args.subcommand}' in {round(time.time() - start_time, 2)} seconds, return code: {code}.")
 
     return code
 
 
+# noinspection PyShadowingBuiltins
 class CustomFormatter(argparse.HelpFormatter):
-    pass
+    def __init__(self,
+                 prog,
+                 indent_increment=2,
+                 max_help_position=24,
+                 width=None):
+        super().__init__(prog, indent_increment, max_help_position, width)
+
+    def format_help(self) -> str:
+        help = self._root_section.format_help()
+        if help:
+            help = self._long_break_matcher.sub('\n\n', help)
+            help = help.strip('\n') + '\n'
+        print("what the fuck:\n" + help + "\n---- end ---")
+        return help

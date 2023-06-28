@@ -1,5 +1,5 @@
 {
-  "type": "c/reimpl",
+  "type": "c.reimpl_fn",
   "inputs": "inputs.txt",
   "target": {
     "decl": "void ft_putchar(char c);",

@@ -1,8 +1,8 @@
 {
-  "type": "c/programOnly1Answer",
-  "answer": "abcdefghijklmnopqrstuvwxyz",
+  "type": "c.scan_stdout",
+  "output": "abcdefghijklmnopqrstuvwxyz",
   "target": {
     "decl": "void ft_print_alphabet(void);",
     "name": "ft_print_alphabet"
-  },
+  }
 }

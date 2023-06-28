@@ -5,12 +5,17 @@ import toml
 
 
 def __config_home() -> Path:
-    if "posix" in os.name or "linux" in os.name:
+    # Give a higher priority to those names
+    if "posix" in os.name or "linux" in os.name or "bsd" in os.name or "aix" in os.name or "sunos" in os.name or "haiku" in os.name or "serenity" in os.name:
         from xdg_base_dirs import xdg_config_home
         return xdg_config_home()
-    elif "win" in os.name or "nt" in os.name:
+    # Windows check
+    if "win" in os.name or "nt" in os.name:
         return Path(os.getenv("APPDATA", os.path.expanduser("~")))
-    raise NotImplementedError("Unsupported OS")
+
+    # Fallback
+    from xdg_base_dirs import xdg_config_home
+    return xdg_config_home()
 
 
 CONFIG_FILE = __config_home() / "fart" / "config.toml"
@@ -36,6 +41,7 @@ DEFAULT_CONFIG = {
     },
     "check": {
         "disabled_checks": [],
+        "show_success": False,
     },
 }
 

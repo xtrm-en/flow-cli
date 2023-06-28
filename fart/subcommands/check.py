@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 from argparse import Namespace, ArgumentParser
 from dataclasses import dataclass
 from typing import Callable, Optional
@@ -21,40 +22,36 @@ def compiler(_: Optional[Namespace] = None) -> bool:
     return True
 
 
-@dataclass
-class NormErrorData:
-    type: str
-    line: int
-    column: int
-    message: str
-
-
 def norminette(_: Namespace) -> bool:
-    # TODO: change to Popen and buffer the output in real time
-    process = subprocess.run(["norminette"], capture_output=True)
-    if process.returncode != 0:
-        errors: dict[str, list[NormErrorData]] = {}
-        output = process.stdout.decode("utf-8")
-        last_data = None
-        for line in output.split("\n"):
-            if line.endswith("OK!"):
-                # success(line[:-5])
-                pass
-            elif line.endswith("Error!"):
-                # error(line[:-8])
-                last_data = line.split(":")[0]
-                errors[last_data] = []
-            elif line.startswith("Error: "):
-                # log("\t" + line[7:], end="\n")
-                if last_data is None:
+    @dataclass
+    class NormErrorData:
+        type: str
+        line: int
+        column: int
+        message: str
+
+    last_file_errors: Optional[tuple[str, list[NormErrorData]]] = None
+    has_errors: bool = False
+    show_success: bool = get_config()["check"]["show_success"]
+
+    process = subprocess.Popen(["norminette"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    while True:
+        sys.__stdout__.flush()
+        output = process.stdout.readline()
+        if output == b"" and process.poll() is not None:
+            break
+        if output:
+            line = output.decode("utf-8").strip()
+            # TODO: Notice!
+            # Notice: GLOBAL_VAR_DETECTED  (line:   6, col:   1):     Global variable present in file. Make sure it is a reasonable choice.
+            if line.startswith("Error: "):
+                if last_file_errors is None:
                     warn("Found error without file name.")
                     continue
-                if last_data not in errors:
-                    errors[last_data] = []
 
                 tokens = [token.strip() for token in line[7:].replace("\t", " ").split(" ") if len(token.strip()) > 0]
                 message: str = " ".join(tokens[5:])
-                errors[last_data].append(
+                last_file_errors[1].append(
                     NormErrorData(
                         tokens[0],
                         int(tokens[2].split(",")[0]),
@@ -62,13 +59,19 @@ def norminette(_: Namespace) -> bool:
                         message,
                     )
                 )
-
-        for file, file_errors in errors.items():
-            error(f"File {file} has {len(file_errors)} errors:")
-            for file_error in file_errors:
-                log(f"\t{file_error.type} on line {file_error.line}, column {file_error.column}: {file_error.message}")
-        return False
-    return True
+            else:
+                if last_file_errors is not None:
+                    error(last_file_errors[0])
+                    for error_data in last_file_errors[1]:
+                        log(f"\t{error_data.type} at ({error_data.line}:{error_data.column}) -> {error_data.message}")
+                if line.endswith("OK!"):
+                    last_file_errors = None
+                    if show_success:
+                        success(line[:-5])
+                elif line.endswith("Error!"):
+                    has_errors = True
+                    last_file_errors = (line[:-6], [])
+    return not has_errors
 
 
 checks: list[Callable[[Namespace], bool]] = [
@@ -83,17 +86,22 @@ def __praser(parser: ArgumentParser) -> None:
 
 def __exec(_: ArgumentParser, namespace: Namespace) -> int:
     config = get_config()
-    disabled_checks = config["check"]["disabled_checks"]
-    force_checks = namespace.checks
 
-    if len(force_checks) > 0:
-        disabled_checks = [check.__name__ for check in checks if check.__name__ not in force_checks]
+    # checks_to_run
 
+    # disabled_checks = config["check"]["disabled_checks"]
+    # force_checks = namespace.checks
+    #
+    # if len(force_checks) > 0:
+    #     disabled_checks = [check.__name__ for check in checks if check.__name__ not in force_checks]
+    #
+    # enabled_checks = dict([(check.__name__, check) for check in checks if check.__name__ not in disabled_checks])
+    #
+    # info(f"Running checks ")
     result = True
     for check_func in checks:
         check_name = check_func.__name__
         if check_name in disabled_checks:
-            info(f"Skipping check '{check_name}' since it's disabled.")
             continue
         info(f"Running check '{check_name}'")
         check_res: bool = check_func(namespace)
