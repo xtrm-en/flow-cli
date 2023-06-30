@@ -91,6 +91,7 @@ class NormErrorData:
 	column: int
 	message: str
 
+
 def norminette() -> dict[str, list[NormErrorData]]:
 	errors: dict[str, list[NormErrorData]] = {}
 	last_error_file: Optional[str] = None
