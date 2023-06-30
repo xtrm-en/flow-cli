@@ -27,26 +27,28 @@ if not os.path.isfile(sys.argv[1]):
 
 file = sys.argv[1]
 fileLen = len(file)
+
 user = os.environ.get("USER", default = "marvin")
 userLen = len(user)
-email = os.environ.get("EMAIL", default = "marvin@student.42.fr") + ">"
+
+email = os.environ.get("EMAIL", default = "marvin@student.42.fr")
 emailLen = len(email)
+
+usermail = user + " <" + email + ">"
+usermailLen = len(usermail)
 
 if fileLen > 42:
 	print("File name is to long, stripping additionnal characters")
 	file = file[:42]
 	fileLen = len(file)
 
+if usermailLen > 36:
+	print("User and mail is to long, stripping additionnal characters")
+	usermail = usermail[:36]
+
 if userLen > 10:
-	print("User is to long, stripping additionnal characters")
+	print("User is too long, stripping additionnal characters")
 	user = user[:10]
-	userLen = len(user)
-
-if emailLen > 25:
-	print("Email is to long, stripping additionnal characters")
-	email = email[:25]
-	emailLen = len(email)
-
 
 asciiArt = [
 	"         :::      ::::::::   */",
@@ -69,10 +71,10 @@ headerCreated ="""/* ***********************************************************
 /*                                               """ + asciiArt[0] +"""
 /*""" + 3 * ' ' + file + (42 - fileLen) * ' ' +"""  """ + asciiArt[1] + """
 /*                                               """ + asciiArt[2] + """
-/*   By: """ + user + """ <""" + email + """""" + (36 - (emailLen + userLen)) * ' ' + """  """ + asciiArt[3] +"""
+/*   By: """ + usermail + """  """ + (36 - usermailLen) * ' ' + """  """ + asciiArt[3] +"""
 /*                                               """ + asciiArt[4] + """
-/*   Created: """ + str(date) + """ """ + str(hour) + """ by """ + user + (9 - userLen) * ' ' +"""   """ + asciiArt[5] + """
-/*   Updated: """ + str(date) + """ """ + str(hour) + """ by """ + user + (9 - userLen) * ' ' +"""   """ + asciiArt[6] + """
+/*   Created: """ + str(date) + """ """ + str(hour) + """ by """ + user + (10 - userLen) * ' ' +"""  """ + asciiArt[5] + """
+/*   Updated: """ + str(date) + """ """ + str(hour) + """ by """ + user + (10 - userLen) * ' ' +"""  """ + asciiArt[6] + """
 /*                                               """ + asciiArt[7] + """
 /* ************************************************************************** */
 """
