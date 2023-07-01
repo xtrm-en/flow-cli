@@ -32,9 +32,10 @@ def __data_home() -> Path:
     return xdg_data_home()
 
 
-CONFIG_DIR = __config_home() / "fart"
-CONFIG_FILE = CONFIG_DIR / "config.toml"
-DATA_DIR = __data_home() / "fart"
+PROGRAM_NAME: str = "fart"
+CONFIG_DIR: Path = __config_home() / PROGRAM_NAME
+CONFIG_FILE: Path = CONFIG_DIR / "config.toml"
+DATA_DIR: Path = __data_home() / PROGRAM_NAME
 
 COMPILER_FLAGS_PRESETS: dict[str, list[str]] = {"none": ["-O0", "-g"]}
 COMPILER_FLAGS_PRESETS["default"] = [*COMPILER_FLAGS_PRESETS["none"], "-Wall", "-Wextra", "-Werror"]

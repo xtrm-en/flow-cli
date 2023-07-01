@@ -4,16 +4,18 @@ import time
 import traceback
 from typing import Callable
 
-from fart.setup import initial_setup
 from fart.commands import get_command_data, load_commands, CommandData
 from fart.config import load_config, is_first_launch
 from fart.launcher import hijack_streams, restore_streams
+from fart.modules import load_modules
+from fart.setup import initial_setup
 from fart.utils import log, error, fatal
 
 
 def main() -> int:
     print("Loading fart-cli...")
     load_config()
+    load_modules()
     load_commands()
 
     # required because argparse is cringe
