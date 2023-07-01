@@ -6,7 +6,7 @@
 /*   By: Nissya <kirito042004@gmail.com>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/01 03:04:37 by nissya            #+#    #+#             */
-/*   Updated: 2023/07/01 03:35:32 by Nissya           ###   ########.fr       */
+/*   Updated: 2023/07/01 16:14:24 by Nissya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,3 +17,5 @@ int	main(int argc, char const *argv[])
 	printf("test");
 	return (0);
 }
+
+static int	lol;

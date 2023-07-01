@@ -134,8 +134,7 @@ def norminette() -> dict[str, list[NormErrorData]]:
 def errors_update():
 	global errors
 	result: dict[str, list[NormErrorData]] = norminette()
-	filename: str = "test.c"
-	errors = result[filename] if filename in result else []
+	errors = result[file] if file in result else []
 
 #rreplace
 # from https://stackoverflow.com/a/2556252/19549720
@@ -153,8 +152,6 @@ def EMPTY_LINE_EOF():
 				del lines[(e.line - 1)]
 			with open(file, 'w') as f:
 				f.writelines(lines)
-	errors_update()
-
 
 def SPC_BEFORE_NL():
 
@@ -165,7 +162,6 @@ def SPC_BEFORE_NL():
 				lines[e.line - 1] = rreplace(lines[e.line - 1], ' ', '', 1)
 			with open(file, 'w') as f:
 				f.writelines(lines)
-	errors_update()
 
 def INVALID_HEADER():
 
@@ -177,7 +173,6 @@ def INVALID_HEADER():
 				f.write(headerCreated)
 			with open(file, 'a') as f:
 				f.write('\n' + txt)
-	errors_update()
 
 def BRACE_SHOULD_EOL():
 
@@ -212,13 +207,27 @@ def RETURN_PARENTHESIS():
 			with open(file, 'w') as f:
 				f.writelines(lines)
 
+def SPACE_REPLACE_TAB():
+	for e in errors:
+		if e.type == 'SPACE_REPLACE_TAB':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				print(lines[e.line - 1].find('int'))
+				if lines[e.line - 1].find('\t') != -1:
+					lines[e.line - 1] = lines[e.line - 1][:e.column - 4] + '\t' + lines[e.line - 1][e.column - 3:]
+				else:
+					lines[e.line - 1] = lines[e.line - 1][:e.column - 1] + '\t' + lines[e.line - 1][e.column:]
+			with open(file, 'w') as f:
+				f.writelines(lines)
+
 checks = [
 	EMPTY_LINE_EOF,
 	SPC_BEFORE_NL,
 	INVALID_HEADER,
 	BRACE_SHOULD_EOL,
 	SPACE_BEFORE_FUNC,
-	RETURN_PARENTHESIS
+	RETURN_PARENTHESIS,
+	SPACE_REPLACE_TAB
 ]
 
 for i in range(0, 10):
