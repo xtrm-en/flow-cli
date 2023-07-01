@@ -51,20 +51,23 @@ if userLen > 10:
 	user = user[:10]
 
 asciiArt = [
-	"         :::      ::::::::   */",
-	"       :+:      :+:    :+:   */",
-	"      +:+ +:+         +:+    */",
-	"    +:+ +:+         +:+      */",
-	"  +#+  +:+       +#+         */",
-	"+#+#+#+#+#+   +#+            */",
-	"     #+#    #+#              */",
-	"    ###   ########.fr        */"
+		"        :::      ::::::::    */",
+		"      :+:      :+:    :+:    */",
+		"    +:+ +:+         +:+      */",
+		"  +#+  +:+       +#+         */",
+		"+#+#+#+#+#+   +#+            */",
+		"     #+#    #+#              */",
+		"    ###   ########.fr        */"
 ]
 
 now = datetime.now()
 
 date = now.strftime("%Y/%m/%d")
 hour = now.strftime("%H:%M:%S")
+
+global headerCreated
+
+
 
 headerCreated ="""/* ************************************************************************** */
 /*                                                                            */
@@ -75,15 +78,16 @@ headerCreated ="""/* ***********************************************************
 /*                                               """ + asciiArt[4] + """
 /*   Created: """ + str(date) + """ """ + str(hour) + """ by """ + user + (10 - userLen) * ' ' +"""  """ + asciiArt[5] + """
 /*   Updated: """ + str(date) + """ """ + str(hour) + """ by """ + user + (10 - userLen) * ' ' +"""  """ + asciiArt[6] + """
-/*                                               """ + asciiArt[7] + """
+/*                                                                            */
 /* ************************************************************************** */
 """
+
+global headerModified
 
 headerModified ="""
 /*   Updated: """+ str(date) + """ """ + str(hour) + """ by """ + user + (10 - userLen) * ' ' +"""   """ + asciiArt[6] + """
 """
 
-print(headerCreated)
 @dataclass
 class NormErrorData:
 	type: str
@@ -129,10 +133,9 @@ def norminette() -> dict[str, list[NormErrorData]]:
 
 def errors_update():
 	global errors
-	errors = norminette().get('test.c')
-
-if not list(norminette().items()) == "[]":
-	errors_update()
+	result: dict[str, list[NormErrorData]] = norminette()
+	filename: str = "test.c"
+	errors = result[filename] if filename in result else []
 
 #rreplace
 # from https://stackoverflow.com/a/2556252/19549720
@@ -165,64 +168,57 @@ def SPC_BEFORE_NL():
 	errors_update()
 
 def INVALID_HEADER():
+
 	for e in errors:
 		if e.type == 'INVALID_HEADER':
 			with open(file, 'r') as f:
-				lines = f.readlines()
-				errorLine = list(lines[e.line - 1])
-				print(errorLine)
-				errorLine[e.column - 1] = errorLine[e.column - 1].replace(' ', '\t')
-				lines[e.line - 1] = ''.join(errorLine)
-				print(errorLine)
+				txt = f.read()
 			with open(file, 'w') as f:
-				f.writelines(lines)
+				f.write(headerCreated)
+			with open(file, 'a') as f:
+				f.write('\n' + txt)
 	errors_update()
 
-# for i in range(0, len(fileContent)):
-# 	if fileContent[i] == '\n' and i + 1 < len(fileContent) and fileContent[i + 1] == ' ':
-# 		index_to_coordinates(fileContent, i + 1)
-# 		print("SPC_INSTEAD_TAB error detected at line " + char_line + " and column " + char_col + "!")
-# 		with open(file, 'w') as f :
-# 			if fileContent[i + 2] == '\t':
-# 				patch = fileContent[:i + 1] + '\t' + fileContent[i + 3:]
-# 			else:
-# 				patch = fileContent[:i + 1] + '\t' + fileContent[i + 2:]
-# 			f.write(patch)
-# 			file_update()
+def BRACE_SHOULD_EOL():
 
-# # MIXED_SPACE_TAB
+	for e in errors:
+		if e.type == 'BRACE_SHOULD_EOL':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				lines[e.line - 1] = lines[e.line - 1] + '\n'
+			with open(file, 'w') as f:
+				f.writelines(lines)
 
-# for i in range(0, len(fileContent)):
-# 	if fileContent[i] == '\t' and fileContent[i + 1] == ' ':
-# 		index_to_coordinates(fileContent, i + 1)
-# 		print("MIXED_SPACE_TAB error detected at line" + char_line + " and column " + char_col + "!")
-# 		with open(file, 'w') as f :
-# 			patch = fileContent[:i + 1] + fileContent[i + 2:]
-# 			while patch[i + 1] == ' ':
-# 				patch = patch[:i + 1] + patch[i + 2:]
-# 			f.write(patch)
-# 			file_update()
+def SPACE_BEFORE_FUNC():
 
-# # CONSECUTIVE_SPC
+	for e in errors:
+		if e.type == 'SPACE_BEFORE_FUNC':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				lines[e.line - 1] = lines[e.line - 1][:e.column - 1] + '\t' + lines[e.line - 1][e.column:]
+			with open(file, 'w') as f:
+				f.writelines(lines)
 
-# for i in range(0, len(fileContent) - 1):
-# 	if not i >= len(fileContent) and fileContent[i] == ' ' and fileContent[i + 1] == ' ':          #not i >= len(fileContent) and i dont fuckin know why IT GOES FUTHER
-# 			index_to_coordinates(fileContent, i)
-# 			print("CONSECUTIVE_SPC error detected at line " + char_line + " and column " + char_col +"!")
-# 			with open(file, 'w') as f :
-# 				j = i + 1
-# 				count = 0
-# 				while fileContent[j] == ' ':
-# 					j += 1
-# 					count += 1
-# 				patch = fileContent[:i + 1] + fileContent[j:]
-# 				f.write(patch)
-# 			fileContent = Path(file).read_text()
+def RETURN_PARENTHESIS():
+
+	for e in errors:
+		if e.type == 'RETURN_PARENTHESIS':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				n = lines[e.line - 1 ].find('n')
+				lines[e.line - 1] = lines[e.line - 1][:n + 1] + ' (' + lines[e.line - 1][n + 2:]
+				semicolon = lines[e.line - 1 ].find(';')
+				lines[e.line - 1] = lines[e.line - 1][:semicolon] + ')' + lines[e.line - 1][semicolon:]
+			with open(file, 'w') as f:
+				f.writelines(lines)
 
 checks = [
 	EMPTY_LINE_EOF,
 	SPC_BEFORE_NL,
-
+	INVALID_HEADER,
+	BRACE_SHOULD_EOL,
+	SPACE_BEFORE_FUNC,
+	RETURN_PARENTHESIS
 ]
 
 for i in range(0, 10):

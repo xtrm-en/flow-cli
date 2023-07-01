@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   test.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: Nissya <kirito042004@gmail.com>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/06/30 17:03:42 by marvin            #+#    #+#             */
-/*   Updated: 2023/06/30 17:03:49 by marvin           ###   ########.fr       */
+/*   Created: 2023/07/01 03:04:37 by nissya            #+#    #+#             */
+/*   Updated: 2023/07/01 03:35:32 by Nissya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
 
-int main(int argc, char const *argv[])
+int	main(int argc, char const *argv[])
 {
 	printf("test");
 	return (0);
