@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
-from importlib import import_module
 from os import listdir
 from os.path import dirname, realpath
 from pathlib import Path
 from typing import Callable, Optional
+
+from fart.utils import warn
+
+from fart.modules import get_modules
 
 
 @dataclass
@@ -18,7 +21,6 @@ class CommandData:
     visible: bool
 
 
-ROOTS: list[Path] = [Path(dirname(realpath(__file__)) + "/subcommands")]
 __cmd_data: list[CommandData] = []
 
 
@@ -32,19 +34,29 @@ def load_commands() -> None:
 
     # Find all commands
     commands = []
-    for commands_dir in ROOTS:
+    for commands_dir in [
+        Path(dirname(realpath(__file__))) / "subcommands",
+        *map(lambda p: Path(p / "subcommands"), get_modules())
+    ]:
+        if not commands_dir.exists():
+            continue
         print(f"Searching for commands in '{commands_dir}'...")
-        for command in listdir(commands_dir):
+        for command_file in commands_dir.iterdir():
+            command = command_file.name
             if command.endswith(".py") and not command.startswith("__"):
-                commands.append(command[:-3])
-        print(f"Fetched {len(commands)} command" + ("s" if len(commands) != 1 else "") + ".")
+                raw_cmd = command[:-3]
+                if raw_cmd not in commands:
+                    commands.append(raw_cmd)
+                else:
+                    warn(f"Command '{raw_cmd}' already exists, skipping...")
+    print(f"Fetched {len(commands)} command" + ("s" if len(commands) != 1 else "") + ".")
 
     # Import everything
     for command in commands:
         print(f"Importing '{command}'")
         try:
             __import__(f"subcommands.{command}")
-        except Exception:
+        except ImportError:
             __import__(f"fart.subcommands.{command}")
 
 

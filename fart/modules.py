@@ -2,7 +2,6 @@
 import subprocess
 import sys
 import time
-from importlib.util import spec_from_file_location, module_from_spec
 from pathlib import Path
 
 from fart.config import DATA_DIR
@@ -13,22 +12,17 @@ __modules: list[Path] = []
 
 
 def load_modules():
-    print("Loading modules...")
+    if not MODULES_DIR.exists():
+        MODULES_DIR.mkdir(parents=True, exist_ok=True)
     for file in MODULES_DIR.iterdir():
         if file.is_dir():
-            print(f"Trying to load {file.name}...")
-            try:
-                spec = spec_from_file_location("fart.module." + file.name, file / "__init__.py")
-                module = module_from_spec(spec)
-                sys.modules[spec.name] = module
-                spec.loader.exec_module(module)
-                __modules.append(file)
-            except Exception as e:
-                if "No such file" in str(e) and "__init__.py" in str(e):
-                    warn(f"Module {file.name} does not have an __init__.py file, skipping...")
-                else:
-                    error(f"Failed to load {file.name}")
-                    print(e)
+            sys.path.insert(1, str(file))
+            __modules.append(file)
+    print(f"Loaded {len(__modules)} modules.")
+
+
+def get_modules() -> list[Path]:
+    return __modules
 
 
 def add_module(target: str) -> bool:
