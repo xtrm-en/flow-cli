@@ -1,88 +1,100 @@
-import argparse
+from argparse import ArgumentParser, Namespace
 import sys
 import time
 import traceback
 from typing import Callable
 
-from fart.commands import get_command_data, load_commands
-from fart.config import load_config
+from fart.setup import initial_setup
+from fart.commands import get_command_data, load_commands, CommandData
+from fart.config import load_config, is_first_launch
 from fart.launcher import hijack_streams, restore_streams
 from fart.utils import log, error, fatal
 
 
 def main() -> int:
-    print("Loading F.A.R.T...")
+    print("Loading fart-cli...")
     load_config()
     load_commands()
 
     # required because argparse is cringe
     restore_streams()
 
-    parser = argparse.ArgumentParser(exit_on_error=True, formatter_class=CustomFormatter)
-    parser.add_argument("-v", "--version", dest="version", help="show the program's version number and exit",
+    parser = ArgumentParser(exit_on_error=False, add_help=False)
+    # Reimplement the `help` argument to override the default help message
+    parser.add_argument("--help", "-h", dest="help", help="show this help message and exit", action="store_true")
+    parser.add_argument("--version", "-v", dest="version", help="show the program's version number and exit",
                         action="store_true")
-    # Aliases
-    # TODO
 
     # Subcommands
+    replace_target: str = "{DESCRIPTION}"
     commands_parser = parser.add_subparsers(title="subcommands",
-                                            dest='subcommand', description="description custom")
-    # custom_description: str = ""
-
-    subcommand_execs: dict[
+                                            dest='subcommand', description=replace_target)
+    execs: dict[
         str,
-        tuple[Callable[[argparse.ArgumentParser, argparse.Namespace], int], argparse.ArgumentParser]
+        tuple[Callable[[ArgumentParser, Namespace], int], ArgumentParser]
     ] = {}
     for cmd in get_command_data():
-        cmd_parser = commands_parser.add_parser(cmd.name, help=cmd.description)
-        if cmd.creation_callback is not None:
-            cmd.creation_callback(cmd_parser)
-        subcommand_execs[cmd.name] = (cmd.run_callback, cmd_parser)
+        for name in cmd.names:
+            cmd_parser = commands_parser.add_parser(name, help=cmd.description)
+            if cmd.creation_callback is not None:
+                cmd.creation_callback(cmd_parser)
+            execs[name] = (cmd.run_callback, cmd_parser)
 
-    parser.formatter_class = argparse.RawDescriptionHelpFormatter
-    args = parser.parse_args()
+    args: Namespace = parser.parse_args()
 
     hijack_streams()
-    # log(args)
+
+    if is_first_launch():
+        if not initial_setup():
+            error("An error occured in the initial setup, aborting...")
+            return -1
+
     if args.version:
         from importlib.metadata import version
         log("Running fart-cli", end=" ")
         log(version("fart"))
         return 0
 
-    if args.subcommand is None:
-        parser.print_help(file=sys.__stdout__)
+    if args.subcommand is None or args.help:
+        def create_desc() -> str:
+            """Create a custom description format to hold aliases and subcommands as separate categories/groups."""
+
+            def spacing(provided: str) -> str:
+                return " " * (22 - len(provided))
+            subcommand_helps: list[str] = [
+                (" " * 2 + c.names[0] + spacing(c.names[0]) + c.description) for c in get_command_data() if not c.alias and c.visible
+            ]
+            alias_helps: list[str] = [
+                (" " * 2 + c.names[0] + spacing(c.names[0]) + c.description) for c in get_command_data() if c.alias
+            ]
+
+            return "\n".join(subcommand_helps) + ("\n" * 2) + "aliases:\n" + "\n".join(alias_helps) + "\n"
+
+        def replace_first_line(text: str, replace_with: str) -> str:
+            lines: list[str] = text.split("\n")
+            lines[0] = lines[0][:lines[0].index("{")] + replace_with + lines[0][lines[0].index("}")+1:]
+            return "\n".join(lines)
+
+        help_str: str = parser.format_help()
+        help_str = replace_first_line(help_str, "<subcommand or alias>")
+
+        index: int = help_str.find(replace_target)
+        assert index != -1
+        overwritten_help: str = help_str[:index-2] + create_desc()
+        sys.__stdout__.write(overwritten_help)
         return 0
 
     start_time = time.time()
     print(f"Running subcommand '{args.subcommand}'...")
-    target, parser = subcommand_execs[args.subcommand]
+    target, parser = execs[args.subcommand]
     code: int
     # noinspection PyBroadException
     try:
         code = target(parser, args)
-    except Exception as e:
+    except Exception:
         error(f"An error occurred while running subcommand '{args.subcommand}', aborting.")
         fatal(traceback.format_exc())
         code = -3
     print(f"Finished subcommand '{args.subcommand}' in {round(time.time() - start_time, 2)} seconds, return code: {code}.")
 
     return code
-
-
-# noinspection PyShadowingBuiltins
-class CustomFormatter(argparse.HelpFormatter):
-    def __init__(self,
-                 prog,
-                 indent_increment=2,
-                 max_help_position=24,
-                 width=None):
-        super().__init__(prog, indent_increment, max_help_position, width)
-
-    def format_help(self) -> str:
-        help = self._root_section.format_help()
-        if help:
-            help = self._long_break_matcher.sub('\n\n', help)
-            help = help.strip('\n') + '\n'
-        print("what the fuck:\n" + help + "\n---- end ---")
-        return help

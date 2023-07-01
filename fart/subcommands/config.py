@@ -186,4 +186,4 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> int:
     return 0
 
 
-create("config", "change configuration values", __parser, __exec)
+create("config", "change configuration values", __parser, __exec, aliases=["cfg", "configure"])

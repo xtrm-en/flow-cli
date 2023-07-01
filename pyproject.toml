@@ -1,6 +1,6 @@
 [project]
 name = "fart"
-version = "0.0.1"
+version = "0.0.2"
 description = "tbd"
 authors = [
     {name = "ROUSSARIE Killian", email="oss@xtrm.me"},
@@ -9,7 +9,7 @@ authors = [
 license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.8"
-dependencies = ["toml", "argparse", "inquirer", "xdg-base-dirs"]
+dependencies = ["toml", "argparse", "inquirer", "xdg-base-dirs", "norminette"]
 
 [project.scripts]
 fart = "fart.launcher:main"

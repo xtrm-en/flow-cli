@@ -1,13 +1,22 @@
 # -*- coding: utf-8 -*-
+import os
 import sys
+import traceback
 from argparse import Namespace, ArgumentParser
-from dataclasses import dataclass
-from typing import Callable, Optional
+from pathlib import Path
+
+from norminette.context import Context
+from norminette.exceptions import CParsingError
+from norminette.lexer import TokenError, Lexer
 
 from fart.commands import create
 from fart.config import get_config, POSSIBLE_VALUES
 from fart.utils import info, warn, success, error, log
+
+from norminette.registry import Registry
+
 import subprocess
+from typing import Callable, Optional
 
 
 def compiler(_: Optional[Namespace] = None) -> bool:
@@ -23,55 +32,62 @@ def compiler(_: Optional[Namespace] = None) -> bool:
 
 
 def norminette(_: Namespace) -> bool:
-    @dataclass
-    class NormErrorData:
-        type: str
-        line: int
-        column: int
-        message: str
+    targets: list[Path] = __find_target_files(Path("."))
 
-    last_file_errors: Optional[tuple[str, list[NormErrorData]]] = None
-    has_errors: bool = False
-    show_success: bool = get_config()["check"]["show_success"]
+    registry = Registry()
+    has_err: bool = False
+    content = None
+    for path in targets:
+        target = str(path)
+        if target[-2:] not in [".c", ".h"]:
+            error(f"{target} is not valid C or C header file")
+        else:
+            try:
+                if content is None:
+                    with open(target) as f:
+                        try:
+                            source = f.read()
+                        except Exception as e:
+                            error("File could not be read: " + str(e))
+                            print(traceback.format_exc())
+                            sys.exit(0)
+                else:
+                    source = content
+                try:
+                    lexer = Lexer(source)
+                    tokens = lexer.get_tokens()
+                except KeyError as e:
+                    error("Error while parsing file: " + str(e))
+                    print(traceback.format_exc())
+                    sys.exit(0)
+                context = Context(target, tokens, False, [])  # TODO: -R
+                registry.run(context, source)
+                if context.errors:
+                    has_err = True
+            except TokenError as e:
+                has_err = True
+                error(target + ": " + e.msg[7:])
+            except CParsingError as e:
+                has_err = True
+                # print(target + f": Error!\n\t{colors(e.msg, 'red')}")
+            except KeyboardInterrupt:
+                sys.exit(1)
 
-    process = subprocess.Popen(["norminette"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    while True:
-        sys.__stdout__.flush()
-        output = process.stdout.readline()
-        if output == b"" and process.poll() is not None:
-            break
-        if output:
-            line = output.decode("utf-8").strip()
-            # TODO: Notice!
-            # Notice: GLOBAL_VAR_DETECTED  (line:   6, col:   1):     Global variable present in file. Make sure it is a reasonable choice.
-            if line.startswith("Error: "):
-                if last_file_errors is None:
-                    warn("Found error without file name.")
-                    continue
+    return has_err
 
-                tokens = [token.strip() for token in line[7:].replace("\t", " ").split(" ") if len(token.strip()) > 0]
-                message: str = " ".join(tokens[5:])
-                last_file_errors[1].append(
-                    NormErrorData(
-                        tokens[0],
-                        int(tokens[2].split(",")[0]),
-                        int(tokens[4].split(")")[0]),
-                        message,
-                    )
-                )
-            else:
-                if last_file_errors is not None:
-                    error(last_file_errors[0])
-                    for error_data in last_file_errors[1]:
-                        log(f"\t{error_data.type} at ({error_data.line}:{error_data.column}) -> {error_data.message}")
-                if line.endswith("OK!"):
-                    last_file_errors = None
-                    if show_success:
-                        success(line[:-5])
-                elif line.endswith("Error!"):
-                    has_errors = True
-                    last_file_errors = (line[:-6], [])
-    return not has_errors
+
+def __is_c_file(path: Path) -> bool:
+    return path.name.endswith(".c") or path.name.endswith(".h")
+
+
+def __find_target_files(root: Path, predicate: Callable[[Path], bool] = __is_c_file) -> list[Path]:
+    targets: list[Path] = []
+    for path in root.iterdir():
+        if path.is_dir():
+            targets.extend(__find_target_files(path, predicate))
+        elif predicate(path):
+            targets.append(path)
+    return targets
 
 
 checks: list[Callable[[Namespace], bool]] = [
@@ -85,25 +101,22 @@ def __praser(parser: ArgumentParser) -> None:
 
 
 def __exec(_: ArgumentParser, namespace: Namespace) -> int:
-    config = get_config()
+    checks_to_run: list[str]
+    if namespace.checks is not None and len(namespace.checks) > 0:
+        checks_to_run = namespace.checks
+    else:
+        config = get_config()
+        disabled_checks: list[str] = config["check"]["disabled_checks"]
+        checks_to_run = [c.__name__ for c in checks if c.__name__ not in disabled_checks]
 
-    # checks_to_run
-
-    # disabled_checks = config["check"]["disabled_checks"]
-    # force_checks = namespace.checks
-    #
-    # if len(force_checks) > 0:
-    #     disabled_checks = [check.__name__ for check in checks if check.__name__ not in force_checks]
-    #
-    # enabled_checks = dict([(check.__name__, check) for check in checks if check.__name__ not in disabled_checks])
-    #
-    # info(f"Running checks ")
     result = True
-    for check_func in checks:
-        check_name = check_func.__name__
-        if check_name in disabled_checks:
-            continue
+    for check_name in checks_to_run:
         info(f"Running check '{check_name}'")
+        check_func: Optional[Callable[[Namespace], bool]] = \
+            next((c for c in checks if c.__name__ == check_name), __default=None)
+        if check_func is None:
+            error(f"Check '{check_name}' does not exist. Existing checks are: {', '.join([c.__name__ for c in checks])}")
+            return 1
         check_res: bool = check_func(namespace)
         if not check_res:
             warn(f"Check '{check_name}' failed.")

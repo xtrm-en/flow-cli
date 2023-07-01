@@ -9,10 +9,12 @@ from typing import Callable, Optional
 
 @dataclass
 class CommandData:
-    name: str
+    names: list[str]
     description: str
     creation_callback: Optional[Callable[[ArgumentParser], None]]
     run_callback: Callable[[ArgumentParser, Namespace], int]
+    alias: bool
+    visible: bool
 
 
 __cmd_data: list[CommandData] = []
@@ -30,6 +32,7 @@ def load_commands() -> None:
     commands_dir = dirname(realpath(__file__)) + "/subcommands"
 
     # Find all commands
+    print(f"Searching for commands in '{commands_dir}'...")
     commands = []
     for command in listdir(commands_dir):
         if command.endswith(".py") and not command.startswith("__"):
@@ -42,6 +45,14 @@ def load_commands() -> None:
         __import__(f"fart.subcommands.{command}")
 
 
+def create_alias(name: str, description: str, creation_callback: Callable[[ArgumentParser], None],
+                 run_callback: Callable[[ArgumentParser, Namespace], int], visible: bool = True) -> None:
+    create(name, description, creation_callback, run_callback, is_alias=True, visible=visible)
+
+
 def create(name: str, description: str, creation_callback: Callable[[ArgumentParser], None],
-           run_callback: Callable[[ArgumentParser, Namespace], int]) -> None:
-    __cmd_data.append(CommandData(name, description, creation_callback, run_callback))
+           run_callback: Callable[[ArgumentParser, Namespace], int], is_alias: bool = False, visible: bool = True, aliases: list[str] = None) -> None:
+    if aliases is None:
+        aliases = []
+    print(f"Creating command '{name}'\n\tDescription: '{description}'\n\tAlias: {is_alias}\n\tVisible: {visible}\n\tAliases: {', '.join(aliases)}")
+    __cmd_data.append(CommandData([name, *aliases], description, creation_callback, run_callback, is_alias, visible))

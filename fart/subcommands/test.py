@@ -11,6 +11,10 @@ def __parser(parser: ArgumentParser) -> None:
     parser.add_argument("tests", help="the test(s) to run", nargs="*")
 
 
+def __test_picker(test_path: str):
+    pass
+
+
 def __exec(_: ArgumentParser, namespace: Namespace) -> int:
     if len(namespace.tests) > 0:
         info(f"Running tests '{', '.join(namespace.tests)}'")
@@ -43,6 +47,7 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> int:
                 else:
                     error("Could not find git url.")
                     continue
+            # 42 project URI
             if "vogsphere" in url.lower():
                 testable_roots.append(root)
 
