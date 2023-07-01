@@ -6,16 +6,23 @@
 /*   By: Nissya <kirito042004@gmail.com>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/01 03:04:37 by nissya            #+#    #+#             */
-/*   Updated: 2023/07/01 16:14:24 by Nissya           ###   ########.fr       */
+/*   Updated: 2023/07/02 01:20:25 by Nissya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
 
-int	main(int argc, char const *argv[])
+int	lol(void);
+
+int	main(void)
 {
-	printf("test");
+	if (lol == 0)
+	{
+		printf("test");
+	}
+	printf(1 + 1);
+
+	if (lol == 0)
+		printf("uwu");
 	return (0);
 }
-
-static int	lol;
