@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from types import ModuleType
+
 
 class Colors:
     """ANSI color codes"""
