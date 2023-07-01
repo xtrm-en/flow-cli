@@ -1,6 +1,5 @@
 import sys
 import os
-import math
 import subprocess
 from pathlib import Path
 from dataclasses import dataclass
@@ -212,13 +211,118 @@ def SPACE_REPLACE_TAB():
 		if e.type == 'SPACE_REPLACE_TAB':
 			with open(file, 'r') as f:
 				lines = f.readlines()
-				print(lines[e.line - 1].find('int'))
-				if lines[e.line - 1].find('\t') != -1:
+				target = lines[e.line- 1]
+				first_char = target.strip()[0]
+				first_char_index = target.index(first_char)
+				if first_char_index != 0 and lines[e.line - 1][0] != '\t' and lines[e.line - 1][0] == ' ':
+					lines[e.line - 1] = '\t' + lines[e.line - 1][first_char_index:]
+				elif lines[e.line - 1][0] == '\t':
 					lines[e.line - 1] = lines[e.line - 1][:e.column - 4] + '\t' + lines[e.line - 1][e.column - 3:]
 				else:
 					lines[e.line - 1] = lines[e.line - 1][:e.column - 1] + '\t' + lines[e.line - 1][e.column:]
 			with open(file, 'w') as f:
 				f.writelines(lines)
+			break
+
+def NL_AFTER_VAR_DECL():
+	for e in errors:
+		if e.type == 'NL_AFTER_VAR_DECL':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				lines[e.line - 2] = lines[e.line - 2] + '\n'
+			with open(file, 'w') as f:
+				f.writelines(lines)
+
+def NL_AFTER_PREPROC():
+	for e in errors:
+		if e.type == 'NL_AFTER_PREPROC':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				lines[e.line - 2] = lines[e.line - 2] + '\n'
+			with open(file, 'w') as f:
+				f.writelines(lines)
+
+def NEWLINE_PRECEDES_FUNC():
+	for e in errors:
+		if e.type == 'NEWLINE_PRECEDES_FUNC':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				lines[e.line - 2] = lines[e.line - 2] + '\n'
+			with open(file, 'w') as f:
+				f.writelines(lines)
+
+def NO_ARGS_VOID():
+	for e in errors:
+		if e.type == 'NO_ARGS_VOID':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				first_parenthesis = lines[e.line - 1].find('(')
+				second_parenthesis = lines[e.line - 1].find(')')
+				lines[e.line - 1] = lines[e.line - 1][:first_parenthesis] + "(void" + lines[e.line - 1][second_parenthesis:]
+			with open(file, 'w') as f:
+				f.writelines(lines)
+
+def CONSECUTIVE_SPC():
+	for e in errors:
+		if e.type == 'CONSECUTIVE_SPC':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				tab_count = lines[e.line - 1].count('\t')
+				e.column -= tab_count * 4
+				lines[e.line - 1] = lines[e.line - 1][:e.column] + lines[e.line - 1][e.column + 1:]
+			with open(file, 'w') as f:
+				f.writelines(lines)
+
+def SPC_BFR_OPERATOR():
+	for e in errors:
+		if e.type == 'SPC_BFR_OPERATOR':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				tab_count = lines[e.line - 1].count('\t')
+				e.column -= tab_count * 4
+				lines[e.line - 1] = lines[e.line - 1][:e.column] + lines[e.line - 1][e.column] + ' ' + lines[e.line - 1][e.column + 1:]
+				lines[e.line - 1] = lines[e.line - 1][:e.column - 1] + lines[e.line - 1][e.column - 1] + ' ' + lines[e.line - 1][e.column:]
+			with open(file, 'w') as f:
+				f.writelines(lines)
+
+def TOO_FEW_TAB():
+	for e in errors:
+		if e.type == 'TOO_FEW_TAB':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				lines[e.line - 1] = '\t' + lines[e.line - 1]
+			with open(file, 'w') as f:
+				f.writelines(lines)
+
+def TOO_MANY_TAB():
+	for e in errors:
+		if e.type == 'TOO_MANY_TAB':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				lines[e.line - 1] = lines[e.line - 1][:0] + lines[e.line - 1][1:]
+			with open(file, 'w') as f:
+				f.writelines(lines)
+
+def SPACE_EMPTY_LINE():
+	for e in errors:
+		if e.type == 'SPACE_EMPTY_LINE':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				lines[e.line - 1] = lines[e.line - 1][:0] + '\n'
+			with open(file, 'w') as f:
+				f.writelines(lines)
+
+def BRACE_NEWLINE():
+	for e in errors:
+		if e.type == 'BRACE_NEWLINE':
+			with open(file, 'r') as f:
+				lines = f.readlines()
+				last_parenthesis = lines[e.line - 1].rfind(')')
+				wrong_brace = lines[e.line - 1].find('{')
+				lines[e.line - 1] = lines[e.line - 1][:last_parenthesis] + lines[e.line - 1][last_parenthesis] + '\n' + lines[e.line - 1][wrong_brace:]
+			with open(file, 'w') as f:
+				f.writelines(lines)
+			exit(0)
 
 checks = [
 	EMPTY_LINE_EOF,
@@ -227,10 +331,20 @@ checks = [
 	BRACE_SHOULD_EOL,
 	SPACE_BEFORE_FUNC,
 	RETURN_PARENTHESIS,
-	SPACE_REPLACE_TAB
+	SPACE_REPLACE_TAB,
+	NL_AFTER_PREPROC,
+	NL_AFTER_VAR_DECL,
+	NEWLINE_PRECEDES_FUNC,
+	NO_ARGS_VOID,
+	CONSECUTIVE_SPC,
+	SPC_BFR_OPERATOR,
+	TOO_FEW_TAB,
+	TOO_MANY_TAB,
+	SPACE_EMPTY_LINE,
+	BRACE_NEWLINE
 ]
 
 for i in range(0, 10):
-	errors_update()
 	for c in checks:
+		errors_update()
 		c()

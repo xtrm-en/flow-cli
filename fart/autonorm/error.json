@@ -1,11 +1,11 @@
 {
-	"SPC_INSTEAD_TAB": "Spaces at beginning of line",
+	"SPC_INSTEAD_TAB": "Spaces at beginning of line", //fixed
 	"TAB_INSTEAD_SPC": "Found tab when expecting space",
-	"CONSECUTIVE_SPC": "Two or more consecutives spaces", 
-	"SPC_BFR_OPERATOR": "missing space before operator",
-	"SPC_AFTER_OPERATOR": "missing space after operator",
-	"NO_SPC_BFR_OPR": "extra space before operator",
-	"NO_SPC_AFR_OPR": "extra space after operator",
+	"CONSECUTIVE_SPC": "Two or more consecutives spaces", //fixed
+	"SPC_BFR_OPERATOR": "missing space before operator", //fixed
+	"SPC_AFTER_OPERATOR": "missing space after operator", //cannot replicate error but fixed?
+	"NO_SPC_BFR_OPR": "extra space before operator", //fixed with CONSECUTIVE_SPC
+	"NO_SPC_AFR_OPR": "extra space after operator", //fixed with CONSECUTIVE_SPC
 	"SPC_AFTER_PAR": "Missing space after parenthesis (brace/bracket)",
 	"SPC_BFR_PAR": "Missing space before parenthesis (brace/bracket)",
 	"NO_SPC_AFR_PAR": "Extra space after parenthesis (brace/bracket)",
@@ -23,12 +23,12 @@
 	"EXP_PARENTHESIS": "Expected parenthesis",
 	"MISSING_IDENTIFIER": "missing type qualifier or identifier in function arguments",
 	"FORBIDDEN_CHAR_NAME": "user defined identifiers should contain only lowercase characters, digits or '_'",
-	"TOO_FEW_TAB": "Missing tabs for indent level",
-	"TOO_MANY_TAB": "Extra tabs for indent level",
-	"SPACE_REPLACE_TAB": "Found space when expecting tab",
-	"TAB_REPLACE_SPACE": "Found tab when expecting space",
+	"TOO_FEW_TAB": "Missing tabs for indent level", //fixed
+	"TOO_MANY_TAB": "Extra tabs for indent level", //fixed
+	"SPACE_REPLACE_TAB": "Found space when expecting tab", //fixed
+	"TAB_REPLACE_SPACE": "Found tab when expecting space", //cannot replicate
 	"TOO_MANY_LINES": "Function has more than 25 lines",
-	"SPACE_EMPTY_LINE": "Space on empty line",
+	"SPACE_EMPTY_LINE": "Space on empty line", //fixed
 	"SPC_BEFORE_NL": "Space before newline", //fixed
 	"TOO_MANY_INSTR": "Too many instructions on a single line",
 	"PREPROC_UKN_STATEMENT": "Unrecognized preprocessor statement",
@@ -54,8 +54,8 @@
 	"BRACE_SHOULD_EOL": "Expected newline after brace", //fixed
 	"CONSECUTIVE_NEWLINES": "Consecutive newlines",
 	"NEWLINE_PRECEDES_FUNC": "Functions must be separated by a newline",
-	"NL_AFTER_VAR_DECL": "Variable declarations must be followed by a newline",
-	"NL_AFTER_PREPROC": "Preprocessor statement must be followed by a newline",
+	"NL_AFTER_VAR_DECL": "Variable declarations must be followed by a newline", //fixed
+	"NL_AFTER_PREPROC": "Preprocessor statement must be followed by a newline", //cannot replicate error but fixed?
 	"MULT_ASSIGN_LINE": "Multiple assignations on a single line",
 	"MULT_DECL_LINE": "Multiple declarations on a single line",
 	"DECL_ASSIGN_LINE": "Declaration and assignation on a single line",
@@ -64,7 +64,7 @@
 	"RETURN_PARENTHESIS": "Return value must be in parenthesis", //fixed
 	"EXP_SEMI_COLON": "Expected semicolon",
 	"EXP_TAB": "Expected tab",
-	"NO_ARGS_VOID": "Empty function argument requires void",
+	"NO_ARGS_VOID": "Empty function argument requires void", //fixed
 	"MISALIGNED_VAR_DECL": "Misaligned variable declaration",
 	"MISALIGNED_FUNC_DECL": "Misaligned function declaration",
 	"WRONG_SCOPE_COMMENT": "Comment is invalid in this scope",
@@ -88,7 +88,7 @@
 	"WRONG_SCOPE_FCT": "Function prototype in incorrect scope",
 	"WRONG_SCOPE": "Statement is in incorrect scope",
 	"INCORRECT_DEFINE": "Incorrect values in define",
-	"BRACE_NEWLINE": "Expected newline before brace",
+	"BRACE_NEWLINE": "Expected newline before brace", //fixed
 	"EXP_NEWLINE": "Expected newline after control structure",
 	"ARG_TYPE_UKN": "Unrecognized variable type",
 	"COMMENT_ON_INSTR": "Comment must be on its own line",
