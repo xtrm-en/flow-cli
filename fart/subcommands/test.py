@@ -55,6 +55,11 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> int:
         error("Could not find any testable git repository.")
         return 1
 
+    if len(testable_roots) > 1:
+        info("Found multiple testable git repositories.")
+        for test_root in testable_roots:
+            info(f"Found testable git repository at '{test_root}'")
+
     for test_root in testable_roots:
         info(f"Looking for tests in '{test_root}'")
 

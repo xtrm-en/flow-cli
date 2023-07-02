@@ -3,8 +3,8 @@ name = "fart"
 version = "0.0.2"
 description = "tbd"
 authors = [
-    {name = "ROUSSARIE Killian", email="oss@xtrm.me"},
-    {name = "LASBORDES Yaniss"}
+    {name = "kroussar", email="oss@xtrm.me"},
+    {name = "ylasbord"}
 ]
 license = {file = "LICENSE"}
 readme = "README.md"

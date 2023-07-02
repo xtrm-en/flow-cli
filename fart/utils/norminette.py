@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-import traceback
 from dataclasses import dataclass
 from pathlib import Path
 
 from norminette.context import Context
-from norminette.exceptions import CParsingError
-from norminette.lexer import Lexer, TokenError, Token
+from norminette.lexer import Lexer, Token
 
 from norminette.registry import Registry
 

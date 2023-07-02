@@ -52,7 +52,7 @@ def load_commands() -> None:
     print(f"Fetched {len(commands)} command" + ("s" if len(commands) != 1 else "") + ".")
 
     # Import everything
-    for command in commands:
+    for command in sorted(commands):
         print(f"Importing '{command}'")
         try:
             __import__(f"subcommands.{command}")

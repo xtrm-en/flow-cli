@@ -1,18 +1,19 @@
 # Features
-
-- [ ] `fart aliases`
-Setup aliases .bashrc/.zshrc/.fishrc
+#### `fart setup`
+- [ ] aliases .bashrc/.zshrc/.fishrc
+- [ ] jsp
 
 #### `fart check`
-- [ ] norminette
+- [x] norminette
 - [ ] compiler
-- [ ] foreigh function access
+- [ ] foreign function access
 
 ##### `fart config`
 - [x] Flags
 - [x] Norminette
 - [ ] Makefile
 - [ ] Libft
+
 
 - [ ] `fart compile [<name>]`
 ```
@@ -22,6 +23,7 @@ else
 -> gcc + -Wall -Werror -Wextra *.c *.h
 end
 ```
+
 - [ ] `fart run`
 ```
 if makefile
@@ -34,7 +36,7 @@ end
 ->rm ./a.out
 ```
 
-- [ ] `fart tester` or `fart tester generate c01 ex1`
+- [ ] `fart test` 
 ```
 reimpl_main.c
 
@@ -43,7 +45,7 @@ if (ft_strlen(CONDITION), strlen(EGAL))
 ```
 
 ```    
-check if c file is <CNameList>
+check if c file is [ListCFiles]
 strlen -> slkjebkjHEBfjhkwbef = 19
 strlen_tester.c
 ```

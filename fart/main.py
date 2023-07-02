@@ -30,7 +30,7 @@ def main() -> int:
     # Subcommands
     replace_target: str = "{DESCRIPTION}"
     commands_parser = parser.add_subparsers(title="subcommands",
-                                            dest='subcommand', description=replace_target)
+                                            dest='command', description=replace_target)
     execs: dict[
         str,
         tuple[Callable[[ArgumentParser, Namespace], int], ArgumentParser]
@@ -63,7 +63,7 @@ def main() -> int:
 
         return 0
 
-    if args.subcommand is None or args.help:
+    if args.command is None or args.help:
         def create_desc() -> str:
             """Create a custom description format to hold aliases and subcommands as separate categories/groups."""
 
@@ -104,16 +104,16 @@ def main() -> int:
         return 0
 
     start_time = time.time()
-    print(f"Running subcommand '{args.subcommand}'...")
-    target, parser = execs[args.subcommand]
+    print(f"Running subcommand '{args.command}'...")
+    target, parser = execs[args.command]
     code: int
     # noinspection PyBroadException
     try:
         code = target(parser, args)
     except Exception:
-        error(f"An error occurred while running subcommand '{args.subcommand}', aborting.")
+        error(f"An error occurred while running subcommand '{args.command}', aborting.")
         fatal(traceback.format_exc())
         code = -3
-    print(f"Finished subcommand '{args.subcommand}' in {round(time.time() - start_time, 2)} seconds, return code: {code}.")
+    print(f"Finished subcommand '{args.command}' in {round(time.time() - start_time, 2)} seconds, return code: {code}.")
 
     return code

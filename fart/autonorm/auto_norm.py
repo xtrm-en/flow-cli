@@ -99,7 +99,7 @@ def norminette() -> dict[str, list[NormErrorData]]:
 	errors: dict[str, list[NormErrorData]] = {}
 	last_error_file: Optional[str] = None
 
-	process = subprocess.Popen(["norminette.py"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	process = subprocess.Popen(["norminette"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	while True:
 		output = process.stdout.readline()
 		if output == b"" and process.poll() is not None:

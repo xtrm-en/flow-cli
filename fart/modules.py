@@ -46,8 +46,6 @@ def get_modules_data() -> list[tuple[str, str]]:
     return data
 
 
-
-
 def add_module(target: str) -> bool:
     print("Checking if `git` is installed...")
     process = subprocess.run(["git", "--version"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -82,4 +80,32 @@ def add_module(target: str) -> bool:
         repo_dir.rmdir()
         return False
     info(f"Successfully fetched from {target} (took {time.time() - start_time:.2f}s)")
+    return True
+
+
+def remove_module(target: str) -> bool:
+    if target.count("/") > 0:
+        error("Target must be a module name, not a repository ID/URL.")
+        return False
+    target_dir = MODULES_DIR / target
+    if not target_dir.exists():
+        error(f"Module {target} does not exist.")
+        return False
+    info(f"Removing module {target}...")
+    start_time: float = time.time()
+
+    def delete_dir(directory: Path):
+        for file in directory.iterdir():
+            if file.is_dir():
+                delete_dir(file)
+            else:
+                file.unlink(missing_ok=True)
+        directory.rmdir()
+
+    try:
+        delete_dir(target_dir)
+        info(f"Successfully removed module {target} (took {time.time() - start_time:.2f}s)")
+    except IOError as e:
+        error(f"Failed to remove module {target}: {e}")
+        return False
     return True
