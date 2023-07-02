@@ -1,19 +1,20 @@
+import importlib.metadata
 from argparse import ArgumentParser, Namespace
 import sys
 import time
 import traceback
 from typing import Callable
 
-from fart.commands import get_command_data, load_commands, CommandData
-from fart.config import load_config, is_first_launch
-from fart.launcher import hijack_streams, restore_streams
-from fart.modules import load_modules, get_modules_data, get_modules
-from fart.setup import initial_setup
-from fart.utils import log, error, fatal, success, info
+from flow.commands import get_command_data, load_commands
+from flow.config import load_config, is_first_launch
+from flow.launcher import hijack_streams, restore_streams
+from flow.modules import load_modules, get_modules_data, get_modules
+from flow.setup import initial_setup
+from flow.utils import log, error, fatal, success, info
 
 
 def main() -> int:
-    print("Loading fart-cli...")
+    print("Loading flow-cli...")
     load_config()
     load_modules()
     load_commands()
@@ -52,11 +53,17 @@ def main() -> int:
             return -1
 
     if args.version:
-        from importlib.metadata import version
-        success("Running fart-cli", end=" ")
-        log(version("fart"))
+        from importlib.metadata import metadata
+        data = metadata("flow")
+        authors: list[str] = sorted(
+            [*data.get_all("Author"), *[it.split("<")[0].strip() for it in data.get_all("Author-email")]]
+        )
+
+        success("Running flow-cli v" + data.get("Version"))
+        log(" " * 4 + "by " + ", ".join(authors))
 
         if len(get_modules()) > 0:
+            log()
             info("Loaded modules:")
             for name, version in get_modules_data():
                 log(f"\t- {name} ({version})")

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
-from fart.utils import Colors
+from flow.utils import Colors
 from io import TextIOWrapper
 from os.path import dirname, realpath
 from pathlib import Path
@@ -71,7 +71,7 @@ class OutputStreamHook:
         self.__logfile = log_dir + "/" + log_file
         Path(self.__logfile).touch(exist_ok=True)
 
-        os.environ["FART_LOG_FILE"] = str(Path(self.__logfile).absolute())
+        os.environ["FLOW_LOG_FILE"] = str(Path(self.__logfile).absolute())
 
     def write(self: OutputStreamHook, text: str) -> None:
         """Writes the text to the origin stream.

@@ -2,8 +2,8 @@
 from argparse import ArgumentParser, Namespace
 from typing import Callable
 
-from fart.commands import create
-from fart.config import get_config
+from flow.commands import create
+from flow.config import get_config
 
 
 def aliases(_: Namespace) -> bool:

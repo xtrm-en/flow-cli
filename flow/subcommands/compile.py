@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from argparse import ArgumentParser, Namespace
-from fart.config import get_config
-from fart.commands import create
+from flow.config import get_config
+from flow.commands import create
 
 
 def __parser(parser: ArgumentParser):

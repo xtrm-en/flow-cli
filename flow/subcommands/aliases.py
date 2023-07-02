@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from argparse import ArgumentParser, Namespace
 
-from fart.commands import create_alias
-from fart.config import get_config
+from flow.commands import create_alias
+from flow.config import get_config
 import subprocess
 
 

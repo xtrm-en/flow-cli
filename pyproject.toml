@@ -1,7 +1,7 @@
 [project]
-name = "fart"
-version = "0.0.2"
-description = "tbd"
+name = "flow"
+version = "0.0.3"
+description = "a multi-purpose command-line tool for 42"
 authors = [
     {name = "kroussar", email="oss@xtrm.me"},
     {name = "ylasbord"}
@@ -12,10 +12,10 @@ requires-python = ">=3.8"
 dependencies = ["toml", "argparse", "inquirer", "xdg-base-dirs", "norminette"]
 
 [project.scripts]
-fart = "fart.launcher:main"
+flow = "flow.launcher:main"
 
 [project.urls]
-"Homepage" = "https://github.com/xtrm-en/fart"
+"Homepage" = "https://github.com/xtrm-en/flow-cli"
 
 [build-system]
 requires = ["setuptools>=61.0"]

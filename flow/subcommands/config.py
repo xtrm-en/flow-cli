@@ -3,9 +3,9 @@ from argparse import ArgumentParser, Namespace
 
 import inquirer
 
-from fart.commands import create
-from fart.config import get_config, save_config, COMPILER_FLAGS_PRESETS, POSSIBLE_VALUES
-from fart.utils import info, log, error, warn, prompt, parse, stringify
+from flow.commands import create
+from flow.config import get_config, save_config, COMPILER_FLAGS_PRESETS, POSSIBLE_VALUES
+from flow.utils import info, log, error, warn, prompt, parse, stringify
 
 
 def flatten_dict(d: dict, parent_key: str = "", sep: str = ".") -> dict:

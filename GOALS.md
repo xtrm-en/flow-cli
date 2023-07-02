@@ -1,21 +1,21 @@
 # Features
-#### `fart setup`
+#### `flow setup`
 - [ ] aliases .bashrc/.zshrc/.fishrc
 - [ ] jsp
 
-#### `fart check`
+#### `flow check`
 - [x] norminette
 - [ ] compiler
 - [ ] foreign function access
 
-##### `fart config`
+##### `flow config`
 - [x] Flags
 - [x] Norminette
 - [ ] Makefile
 - [ ] Libft
 
 
-- [ ] `fart compile [<name>]`
+- [ ] `flow compile [<name>]`
 ```
 if makefile
 ->make <name of project(found in makefile)>
@@ -24,7 +24,7 @@ else
 end
 ```
 
-- [ ] `fart run`
+- [ ] `flow run`
 ```
 if makefile
 ->make <name of project(found in makefile)>
@@ -36,7 +36,7 @@ end
 ->rm ./a.out
 ```
 
-- [ ] `fart test` 
+- [ ] `flow test` 
 ```
 reimpl_main.c
 
@@ -50,8 +50,8 @@ strlen -> slkjebkjHEBfjhkwbef = 19
 strlen_tester.c
 ```
 
-- [ ] `fart watch`
-Repliquer comportement `watch -n0 fart check` (en gros)
+- [ ] `flow watch`
+Repliquer comportement `watch -n0 flow check` (en gros)
 
-- [x] `fart valgrind`
+- [x] `flow valgrind`
 memcheck + leaks + flags

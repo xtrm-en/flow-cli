@@ -204,6 +204,4 @@ tags
 # IDEs
 .idea/
 .vscode/
-
-# Project logfiles
-/logs
+.fleet/

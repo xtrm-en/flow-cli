@@ -6,9 +6,9 @@ from os.path import dirname, realpath
 from pathlib import Path
 from typing import Callable, Optional
 
-from fart.utils import warn
+from flow.utils import warn
 
-from fart.modules import get_modules
+from flow.modules import get_modules
 
 
 @dataclass
@@ -54,10 +54,21 @@ def load_commands() -> None:
     # Import everything
     for command in sorted(commands):
         print(f"Importing '{command}'")
+        # noinspection PyBroadException
         try:
-            __import__(f"subcommands.{command}")
-        except ImportError:
-            __import__(f"fart.subcommands.{command}")
+            __import__(f"flow.subcommands.{command}")
+        except (ImportError, ModuleNotFoundError):
+            # noinspection PyBroadException
+            try:
+                __import__(f"subcommands.{command}")
+            except Exception:
+                warn(f"Failed to import command '{command}', check debug logs for errors.")
+                import traceback
+                print(traceback.format_exc())
+        except Exception:
+            warn(f"Failed to import command '{command}', check debug logs for errors.")
+            import traceback
+            print(traceback.format_exc())
 
 
 def create_alias(name: str, description: str, creation_callback: Callable[[ArgumentParser], None],

@@ -2,9 +2,9 @@
 import sys
 from argparse import ArgumentParser, Namespace
 
-from fart.commands import create
-from fart.modules import add_module
-from fart.utils import error
+from flow.commands import create
+from flow.modules import add_module, remove_module
+from flow.utils import error
 
 
 def __parser(parser: ArgumentParser):
@@ -27,4 +27,4 @@ def __exec(parser: ArgumentParser, args: Namespace) -> int:
     return 1
 
 
-create("module", "manages fart modules", __parser, __exec)
+create("module", "manages flow modules", __parser, __exec)

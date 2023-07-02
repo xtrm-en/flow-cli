@@ -6,9 +6,9 @@ from pathlib import Path
 from norminette.exceptions import CParsingError
 from norminette.lexer import TokenError
 
-from fart.commands import create
-from fart.config import get_config, POSSIBLE_VALUES
-from fart.utils import info, warn, success, error, log, run_norminette
+from flow.commands import create
+from flow.config import get_config, POSSIBLE_VALUES
+from flow.utils import info, warn, success, error, log, run_norminette
 
 import subprocess
 from typing import Callable, Optional
@@ -17,7 +17,7 @@ from typing import Callable, Optional
 def compiler(_: Optional[Namespace] = None) -> bool:
     config = get_config()
 
-    #TODO: compilation process
+    # TODO: compilation process
 
     # process = subprocess.run([config["commands"]["compiler_command"], *config["commands"]["compiler_flags"]],
     #                          capture_output=True)

@@ -1,15 +1,5 @@
-# Fast and Autonomous Reliability Tool
-###### F.A.R.T.
-
-## Install
-```bash
-git clone https://github.com/xtrm-en/fart.git
-cd fart
-
-python3 -m pip install -Ur requirements.txt
-
-python3 setup.py install --user
-```
+# flow-cli 
+A command-line tool for automating and prettifying common tasks, built for 42.
 
 ## License
-This project is licensed under the LGPLv3, see the [LICENSE.md](./LICENSE) file for more details.
+This project is licensed under the LGPLv3, see the [LICENSE file](./LICENSE) for more details.

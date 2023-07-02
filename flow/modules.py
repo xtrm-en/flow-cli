@@ -4,8 +4,8 @@ import sys
 import time
 from pathlib import Path
 
-from fart.config import DATA_DIR
-from fart.utils import error, warn, info
+from flow.config import DATA_DIR
+from flow.utils import error, warn, info
 
 MODULES_DIR: Path = DATA_DIR / "modules"
 __modules: list[Path] = []

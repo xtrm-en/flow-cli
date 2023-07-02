@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from argparse import Namespace, ArgumentParser
 
-from fart.commands import create
-from fart.config import get_config
-from fart.utils import info, warn, success, error, log, fatal
+from flow.commands import create
+from flow.config import get_config
+from flow.utils import info, warn, success, error, log, fatal
 
 
 def __run(_: ArgumentParser, __: Namespace) -> int:

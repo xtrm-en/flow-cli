@@ -4,7 +4,7 @@ import sys
 import subprocess
 from argparse import Namespace, ArgumentParser
 
-from fart.commands import create
+from flow.commands import create
 
 
 # noinspection PyShadowingBuiltins
@@ -31,7 +31,7 @@ def __watch(_: ArgumentParser, __: Namespace) -> int:
 
     running: bool = True
     while running:
-        process = subprocess.run(["fart", "check"], capture_output=True)
+        process = subprocess.run(["flow", "check"], capture_output=True)
         sys.__stdout__.write("\033[0;0H")
         print("\n" * 4, flush=False)
         print(process.stdout.decode(), flush=False)

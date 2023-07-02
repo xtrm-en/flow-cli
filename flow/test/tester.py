@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from fart.test.types import TestMetadata
+from flow.test.types import TestMetadata
 
 
 base_dirs: list[Path] = [

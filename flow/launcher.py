@@ -23,13 +23,13 @@ def hijack_streams(logging: bool = False) -> None:
     """Allows modified printing by replacing the
     standard output streams with custom ones."""
     if logging:
-        os.environ["FART_DEBUG_LOG"] = "1"
+        os.environ["FLOW_DEBUG_LOG"] = "1"
 
     # Debug log output
     writeback: bool = False
-    write_logs: bool = os.environ.get("FART_DEBUG_LOG", "0") == "1"
+    write_logs: bool = os.environ.get("FLOW_DEBUG_LOG", "0") == "1"
 
-    from fart.output import OutputStreamHook
+    from flow.output import OutputStreamHook
 
     OutputStreamHook.apply(sys, "stdout", False, writeback, write_logs)
     OutputStreamHook.apply(sys, "stderr", True, writeback, write_logs)
@@ -60,7 +60,7 @@ def main() -> None:
     # Load the main module and call the main function
     print("Fetching main target...", end=" ")
     try:
-        main_module: ModuleType = __import__("fart.main")
+        main_module: ModuleType = __import__("flow.main")
         print("got:", main_module)
 
         print("Calling main function...")
@@ -69,7 +69,7 @@ def main() -> None:
             exit_code = main_module.__dict__["main"].__dict__["main"]()
         except Exception:
             import traceback
-            from fart.utils import error
+            from flow.utils import error
 
             error("An unhandled exception occurred in the main function:\n" + traceback.format_exc() + "\n")
             exit_code = -1
@@ -85,9 +85,9 @@ def main() -> None:
         print("Could not find main module, aborting execution!")
         print(e)
     
-    if os.environ["FART_DEBUG_LOG"] == "1":
-        from fart.utils import log
-        log("Debug log dumped at " + os.environ["FART_LOG_FILE"])
+    if os.environ["FLOW_DEBUG_LOG"] == "1":
+        from flow.utils import log
+        log("Debug log dumped at:\n" + os.environ["FLOW_LOG_FILE"])
 
     # Unhook the output streams
     restore_streams()

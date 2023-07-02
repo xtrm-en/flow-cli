@@ -32,7 +32,7 @@ def __data_home() -> Path:
     return xdg_data_home()
 
 
-PROGRAM_NAME: str = "fart"
+PROGRAM_NAME: str = "flow"
 CONFIG_DIR: Path = __config_home() / PROGRAM_NAME
 CONFIG_FILE: Path = CONFIG_DIR / "config.toml"
 DATA_DIR: Path = __data_home() / PROGRAM_NAME

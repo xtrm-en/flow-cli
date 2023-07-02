@@ -2,7 +2,7 @@
 import sys
 
 from . import Colors
-from fart.config import get_config
+from flow.config import get_config
 
 SYMBOL_TABLE = {
     "emoji": {
@@ -26,7 +26,7 @@ SYMBOL_TABLE = {
 }
 
 
-def log(message: object, end: str = "\n") -> None:
+def log(message: object = "", end: str = "\n") -> None:
     """Prints a message to the original standard output stream, as well as the hooked one."""
     print(message, end=end)
     sys.__stdout__.write(str(message) + end)

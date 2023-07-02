@@ -3,8 +3,8 @@
 import os
 import sys
 
-from fart.config import get_config
-from fart.utils import info, error, log
+from flow.config import get_config
+from flow.utils import info, error, log
 
 
 def initial_setup() -> bool:
