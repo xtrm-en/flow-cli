@@ -21,7 +21,7 @@ def main() -> int:
     # required because argparse is cringe
     restore_streams()
 
-    parser = ArgumentParser(exit_on_error=False, add_help=False)
+    parser = ArgumentParser(exit_on_error=True, add_help=False)
     # Reimplement the `help` argument to override the default help message
     parser.add_argument("--help", "-h", dest="help", help="show this help message and exit", action="store_true")
     parser.add_argument("--version", "-v", dest="version", help="show the program's version number and exit",
