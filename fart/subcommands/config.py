@@ -174,7 +174,7 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> int:
                     ),
                 ])["value"]
 
-                if not follows_restrictions(final_key, parse(value, type(flat_default[result]))):
+                if not follows_restrictions(final_key, parse(value, type(flat_default[final_key]))):
                     return 3
 
                 value = set_key(final_key, value)

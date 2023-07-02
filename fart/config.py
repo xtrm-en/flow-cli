@@ -53,8 +53,7 @@ DEFAULT_CONFIG = {
     "commands": {
         "compiler_command": "clang",
         "compiler_flags": COMPILER_FLAGS_PRESETS["default"],
-        "norminette_command": "norminette",
-        "norminette_flags": [],
+        "norminette_extras": [],
         "valgrind_command": "valgrind",
         "valgrind_flags": ["--leak-check=full", "--show-leak-kinds=all", "--track-origins=yes", "--verbose",
                            "--log-file=valgrind-out.txt"],
@@ -88,6 +87,13 @@ def load_config() -> dict:
             elif isinstance(value, dict):
                 print("Fixing config (" + key + ")")
                 fix_layer(layer[key], against[key])
+
+        to_remove = []
+        for key, value in layer.items():
+            if key not in against:
+                print("Removing config (" + key + ")")
+                to_remove.append(key)
+        [layer.pop(key) for key in to_remove]
 
     print("Fixing config (root)")
     fix_layer(__config, DEFAULT_CONFIG)

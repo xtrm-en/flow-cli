@@ -25,6 +25,29 @@ def get_modules() -> list[Path]:
     return __modules
 
 
+def get_modules_data() -> list[tuple[str, str]]:
+    data: list[tuple[str, str]] = []
+    for module_dir in get_modules():
+        module_name: str = module_dir.name
+        module_version: str = "unknown"
+
+        git_dir = module_dir / ".git"
+        if git_dir.exists():
+            with open(git_dir / "HEAD") as head_file:
+                head = head_file.read().strip()
+                if head.startswith("ref: "):
+                    branch = head[5:]
+                    with open(git_dir / branch) as branch_file:
+                        module_version = branch_file.read().strip()[:9]
+                else:
+                    module_version = head[:9]
+                module_version = "git-" + module_version
+        data.append((module_name, module_version))
+    return data
+
+
+
+
 def add_module(target: str) -> bool:
     print("Checking if `git` is installed...")
     process = subprocess.run(["git", "--version"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

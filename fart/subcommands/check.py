@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
-import os
-import sys
 import traceback
 from argparse import Namespace, ArgumentParser
 from pathlib import Path
 
-from norminette.context import Context
 from norminette.exceptions import CParsingError
-from norminette.lexer import TokenError, Lexer
+from norminette.lexer import TokenError
 
 from fart.commands import create
 from fart.config import get_config, POSSIBLE_VALUES
-from fart.utils import info, warn, success, error, log
-
-from norminette.registry import Registry
+from fart.utils import info, warn, success, error, log, run_norminette
 
 import subprocess
 from typing import Callable, Optional
@@ -22,58 +17,47 @@ from typing import Callable, Optional
 def compiler(_: Optional[Namespace] = None) -> bool:
     config = get_config()
 
-    process = subprocess.run([config["commands"]["compiler_command"], *config["commands"]["compiler_flags"]],
-                             capture_output=True)
-    if process.returncode != 0:
-        output = process.stderr.decode("utf-8")
-        log(output)
-        return False
+    #TODO: compilation process
+
+    # process = subprocess.run([config["commands"]["compiler_command"], *config["commands"]["compiler_flags"]],
+    #                          capture_output=True)
+    # if process.returncode != 0:
+    #     output = process.stderr.decode("utf-8")
+    #     log(output)
+    #     return False
     return True
 
 
 def norminette(_: Namespace) -> bool:
-    targets: list[Path] = __find_target_files(Path("."))
+    show_success: bool = get_config()["check"]["show_success"]
+    check_result = True
+    for target in __find_target_files(Path(".")):
+        try:
+            output = run_norminette(target)
+            if len(output) == 0:
+                if show_success:
+                    success(f"{target}")
+                continue
 
-    registry = Registry()
-    has_err: bool = False
-    content = None
-    for path in targets:
-        target = str(path)
-        if target[-2:] not in [".c", ".h"]:
-            error(f"{target} is not valid C or C header file")
-        else:
-            try:
-                if content is None:
-                    with open(target) as f:
-                        try:
-                            source = f.read()
-                        except Exception as e:
-                            error("File could not be read: " + str(e))
-                            print(traceback.format_exc())
-                            sys.exit(0)
+            is_error: bool = any([it.is_error for it in output])
+            if is_error:
+                check_result = False
+                error(f"{target}:")
+            else:
+                info(f"{target}:")
+            for it in output:
+                if it.is_error:
+                    error(f"\t{it.format()}")
                 else:
-                    source = content
-                try:
-                    lexer = Lexer(source)
-                    tokens = lexer.get_tokens()
-                except KeyError as e:
-                    error("Error while parsing file: " + str(e))
-                    print(traceback.format_exc())
-                    sys.exit(0)
-                context = Context(target, tokens, False, [])  # TODO: -R
-                registry.run(context, source)
-                if context.errors:
-                    has_err = True
-            except TokenError as e:
-                has_err = True
-                error(target + ": " + e.msg[7:])
-            except CParsingError as e:
-                has_err = True
-                # print(target + f": Error!\n\t{colors(e.msg, 'red')}")
-            except KeyboardInterrupt:
-                sys.exit(1)
-
-    return has_err
+                    warn(f"\t{it.format()}")
+        except (CParsingError, TokenError) as e:
+            error(f"Failed to parse '{target}': {e}")
+            check_result = False
+        except Exception as e:
+            error(f"Error while checking '{target}': {e}")
+            traceback.print_exc()
+            return False
+    return check_result
 
 
 def __is_c_file(path: Path) -> bool:
@@ -87,7 +71,7 @@ def __find_target_files(root: Path, predicate: Callable[[Path], bool] = __is_c_f
             targets.extend(__find_target_files(path, predicate))
         elif predicate(path):
             targets.append(path)
-    return targets
+    return sorted(targets, key=lambda p: str(p))
 
 
 checks: list[Callable[[Namespace], bool]] = [
@@ -113,7 +97,7 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> int:
     for check_name in checks_to_run:
         info(f"Running check '{check_name}'")
         check_func: Optional[Callable[[Namespace], bool]] = \
-            next((c for c in checks if c.__name__ == check_name), __default=None)
+            [c for c in checks if c.__name__ == check_name][0] if check_name in [c.__name__ for c in checks] else None
         if check_func is None:
             error(f"Check '{check_name}' does not exist. Existing checks are: {', '.join([c.__name__ for c in checks])}")
             return 1
@@ -122,8 +106,8 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> int:
             warn(f"Check '{check_name}' failed.")
             result = False
         else:
-            success(f"Check '{check_name}' passed.")
-            pass
+            if len(checks_to_run) > 1:
+                success(f"Check '{check_name}' passed.")
 
     if not result:
         error("Some checks failed. Please fix them before continuing.")

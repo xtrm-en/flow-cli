@@ -7,9 +7,9 @@ from typing import Callable
 from fart.commands import get_command_data, load_commands, CommandData
 from fart.config import load_config, is_first_launch
 from fart.launcher import hijack_streams, restore_streams
-from fart.modules import load_modules
+from fart.modules import load_modules, get_modules_data, get_modules
 from fart.setup import initial_setup
-from fart.utils import log, error, fatal
+from fart.utils import log, error, fatal, success, info
 
 
 def main() -> int:
@@ -53,8 +53,14 @@ def main() -> int:
 
     if args.version:
         from importlib.metadata import version
-        log("Running fart-cli", end=" ")
+        success("Running fart-cli", end=" ")
         log(version("fart"))
+
+        if len(get_modules()) > 0:
+            info("Loaded modules:")
+            for name, version in get_modules_data():
+                log(f"\t- {name} ({version})")
+
         return 0
 
     if args.subcommand is None or args.help:
@@ -74,7 +80,18 @@ def main() -> int:
 
         def replace_first_line(text: str, replace_with: str) -> str:
             lines: list[str] = text.split("\n")
-            lines[0] = lines[0][:lines[0].index("{")] + replace_with + lines[0][lines[0].index("}")+1:]
+            first_index: int = -1
+            second_index: int = -1
+            line_index = 0
+            for i in range(3):
+                try:
+                    first_index = lines[line_index].index('{')
+                    second_index = lines[line_index].index('}')
+                    break
+                except ValueError:
+                    line_index += 1
+            if first_index != -1 and second_index != -1:
+                lines[line_index] = lines[line_index][:first_index] + replace_with + lines[line_index][second_index+1:]
             return "\n".join(lines)
 
         help_str: str = parser.format_help()

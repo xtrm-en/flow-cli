@@ -25,7 +25,7 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> int:
     cwd = os.getcwd()
     info(f"Looking for testable files in '{cwd}'...")
 
-    print("Looking for git repositories")
+    print("Looking for testable git repositories")
     testable_roots: list[str] = []
     for root, dirs, files in os.walk(cwd):
         if ".git" in dirs:
@@ -45,7 +45,7 @@ def __exec(_: ArgumentParser, namespace: Namespace) -> int:
                         print(f"Found git url '{url}'")
                         break
                 else:
-                    error("Could not find git url.")
+                    error("Could not find git url. (" + git_config + ")")
                     continue
             # 42 project URI
             if "vogsphere" in url.lower():
