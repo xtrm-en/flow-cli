@@ -66,12 +66,18 @@ def add_module(target: str) -> bool:
         error("`git` is not installed on your machine.")
         return False
 
-    if target.count("/") == 1 and "http" not in target:
-        warn("Assuming that the target is a GitHub repository ID, fixing...")
-        target = f"https://github.com/{target}"
-    elif "git@" in target:
-        warn("Assuming that the target is an SSH URI, fixing...")
-        target = target.replace("git@", "https://").replace(":", "/")
+    if "http" not in target.lower():
+        if target.count("/") == 0:
+            warn("Assuming that the target is a GitHub repository name, fixing...")
+            if not target.startswith("flow-"):
+                target = f"flow-{target}"
+            target = f"https://github.com/xtrm-en/{target}"
+        elif target.count("/") == 1:
+            warn("Assuming that the target is a GitHub repository ID, fixing...")
+            target = f"https://github.com/{target}"
+        elif "git@" in target:
+            warn("Assuming that the target is an SSH URI, fixing...")
+            target = target.replace("git@", "https://").replace(":", "/")
 
     repo_name: str = target.split("/")[-1]
     if repo_name.endswith(".git"):
