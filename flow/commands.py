@@ -58,13 +58,21 @@ def load_commands() -> None:
         try:
             __import__(f"flow.subcommands.{command}")
         except (ImportError, ModuleNotFoundError):
-            # noinspection PyBroadException
-            try:
-                __import__(f"subcommands.{command}")
-            except Exception:
-                warn(f"Failed to import command '{command}', check debug logs for errors.")
-                import traceback
-                print(traceback.format_exc())
+            imported: bool = False
+            for module in get_modules():
+                # noinspection PyBroadException
+                try:
+                    __import__(f"{module.name}.subcommands.{command}")
+                    imported = True
+                    break
+                except (ImportError, ModuleNotFoundError):
+                    pass
+                except Exception:
+                    warn(f"Failed to import command '{command}', check debug logs for errors.")
+                    import traceback
+                    print(traceback.format_exc())
+            if not imported:
+                warn(f"Failed to import command '{command}', not found.")
         except Exception:
             warn(f"Failed to import command '{command}', check debug logs for errors.")
             import traceback

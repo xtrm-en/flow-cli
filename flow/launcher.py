@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import traceback
 from os.path import dirname, realpath
 from types import ModuleType
 
@@ -68,7 +69,6 @@ def main() -> None:
         try:
             exit_code = main_module.__dict__["main"].__dict__["main"]()
         except Exception:
-            import traceback
             from flow.utils import error
 
             error("An unhandled exception occurred in the main function:\n" + traceback.format_exc() + "\n")
@@ -85,7 +85,7 @@ def main() -> None:
         print("Could not find main module, aborting execution!")
         print(e)
     
-    if os.environ["FLOW_DEBUG_LOG"] == "1":
+    if os.environ.get("FLOW_DEBUG_LOG", "0") == "1":
         from flow.utils import log
         log("Debug log dumped at:\n" + os.environ["FLOW_LOG_FILE"])
 
@@ -97,4 +97,13 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    # noinspection PyBroadException
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.__stdout__.write("\nKeyboardInterrupt, aborting...\n")
+        sys.exit(-1)
+    except Exception as e:
+        sys.__stdout__.write("\nAn unhandled exception occurred, aborting...\n")
+        sys.__stdout__.write(traceback.format_exc() + "\n")
+        sys.exit(-1)

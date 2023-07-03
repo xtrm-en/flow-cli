@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
+import importlib
 import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Optional
 
 from flow.config import DATA_DIR
-from flow.utils import error, warn, info
+from flow.utils import error, warn, info, log
 
 MODULES_DIR: Path = DATA_DIR / "modules"
 __modules: list[Path] = []
@@ -14,11 +16,21 @@ __modules: list[Path] = []
 def load_modules():
     if not MODULES_DIR.exists():
         MODULES_DIR.mkdir(parents=True, exist_ok=True)
+    sys.path.insert(1, str(MODULES_DIR))
     for file in MODULES_DIR.iterdir():
         if file.is_dir():
-            sys.path.insert(1, str(file))
             __modules.append(file)
-    print(f"Loaded {len(__modules)} modules.")
+    print(f"Found {len(__modules)} modules.")
+    if len(__modules) > 0:
+        print("Loading modules...")
+        for module in __modules:
+            print(f"Loading module '{module.name}'...")
+            try:
+                importlib.import_module(module.name)
+            except Exception as e:
+                error(f"Failed to load module '{module.name}': {e}")
+                continue
+            print(f"Loaded module '{module.name}'")
 
 
 def get_modules() -> list[Path]:
@@ -109,3 +121,40 @@ def remove_module(target: str) -> bool:
         error(f"Failed to remove module {target}: {e}")
         return False
     return True
+
+
+def update_module(name: Optional[str]) -> bool:
+    if name is None:
+        if len(get_modules()) == 0:
+            error("No modules installed.")
+            return False
+        info("No target specified, updating all modules...")
+        result = True
+        for module in get_modules():
+            if not update_module(module.name):
+                result = False
+        return result
+
+    target_dir = MODULES_DIR / name
+    if not target_dir.exists():
+        error(f"Module {name} does not exist.")
+        return False
+    info(f"Updating module {name}...")
+    start_time: float = time.time()
+    process = subprocess.run(["git", "pull"], cwd=str(target_dir))
+    if process.returncode != 0:
+        error(f"Failed to update module {name}")
+        return False
+    info(f"Successfully updated module {name} (took {time.time() - start_time:.2f}s)")
+    return True
+
+
+def log_modules() -> None:
+    n: int = len(get_modules())
+    if n == 0:
+        info("No modules loaded.")
+        return
+
+    info(f"Loaded modules {n}:")
+    for name, version in get_modules_data():
+        log(f"\t- {name} ({version})")

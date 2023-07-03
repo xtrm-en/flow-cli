@@ -29,11 +29,12 @@ def compiler(_: Optional[Namespace] = None) -> bool:
 
 
 def norminette(_: Namespace) -> bool:
-    show_success: bool = get_config()["check"]["show_success"]
+    config = get_config()
+    show_success: bool = config["check"]["show_success"]
     check_result = True
     for target in __find_target_files(Path(".")):
         try:
-            output = run_norminette(target)
+            output = run_norminette(target, extra=config["check"]["norminette_extras"])
             if len(output) == 0:
                 if show_success:
                     success(f"{target}")

@@ -83,10 +83,12 @@ def load_config() -> dict:
     def fix_layer(layer: dict, against: dict) -> None:
         for key, value in against.items():
             if key not in layer:
+                print("Adding missing key (" + key + ")")
                 layer[key] = value
             elif isinstance(value, dict):
                 print("Fixing config (" + key + ")")
                 fix_layer(layer[key], against[key])
+                print("Config fixed (" + key + ")")
 
         to_remove = []
         for key, value in layer.items():
@@ -95,8 +97,10 @@ def load_config() -> dict:
                 to_remove.append(key)
         [layer.pop(key) for key in to_remove]
 
-    print("Fixing config (root)")
+    print("Fixing config (__root__)")
     fix_layer(__config, DEFAULT_CONFIG)
+    print("Config fixed (__root__)")
+    print(str(__config))
 
     return __config
 

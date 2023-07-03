@@ -8,15 +8,15 @@ from typing import Callable
 from flow.commands import get_command_data, load_commands
 from flow.config import load_config, is_first_launch
 from flow.launcher import hijack_streams, restore_streams
-from flow.modules import load_modules, get_modules_data, get_modules
+from flow.modules import load_modules, get_modules_data, get_modules, log_modules
 from flow.setup import initial_setup
 from flow.utils import log, error, fatal, success, info
 
 
 def main() -> int:
     print("Loading flow-cli...")
-    load_config()
     load_modules()
+    load_config()
     load_commands()
 
     # required because argparse is cringe
@@ -62,11 +62,7 @@ def main() -> int:
         success("Running flow-cli v" + data.get("Version"))
         log(" " * 4 + "by " + ", ".join(authors))
 
-        if len(get_modules()) > 0:
-            log()
-            info("Loaded modules:")
-            for name, version in get_modules_data():
-                log(f"\t- {name} ({version})")
+        log_modules()
 
         return 0
 
