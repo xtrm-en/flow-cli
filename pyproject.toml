@@ -1,7 +1,7 @@
 [project]
 name = "flow"
 version = "0.0.4"
-description = "a multi-purpose command-line tool for 42"
+description = "A multi-purpose command-line tool for automating and prettifying common tasks, built for 42."
 authors = [
     {name = "kroussar", email="oss@xtrm.me"},
     {name = "ylasbord"}
