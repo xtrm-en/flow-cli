@@ -39,4 +39,4 @@ def __exec(parser: ArgumentParser, args: Namespace) -> int:
     return 1
 
 
-create("module", "manages flow modules", __parser, __exec)
+create("module", "manages flow modules", __parser, __exec, aliases=["m", "modules"])
